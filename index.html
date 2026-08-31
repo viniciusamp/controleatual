@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Checklist de Instalação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-light:#1E42F5;
+    --blue-base:#0B26C9;
+    --blue-deep:#050B3E;
+    --blue-black:#030620;
+    --panel:rgba(255,255,255,.055);
+    --panel-solid:#0E1550;
+    --panel-border:rgba(255,255,255,.14);
+    --panel-border-hover:rgba(255,255,255,.28);
+    --ink:#FFFFFF;
+    --ink-soft:rgba(255,255,255,.66);
+    --ink-faint:rgba(255,255,255,.38);
+    --line:rgba(255,255,255,.14);
+    --amber:#F2B33D;
+    --amber-deep:#D99A22;
+    --green:#38D39F;
+    --red:#FF6B6B;
+    --radius:12px;
+    --radius-sm:8px;
+    --glow-white:0 0 0 1px rgba(255,255,255,.5), 0 0 18px rgba(255,255,255,.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1100px 700px at 12% -10%, var(--blue-light) 0%, transparent 55%),
+      radial-gradient(900px 600px at 100% 110%, var(--blue-base) 0%, transparent 60%),
+      linear-gradient(160deg, var(--blue-deep) 0%, var(--blue-black) 100%);
+    background-attachment:fixed;
+    color:var(--ink);
+    font-family:'Archivo', sans-serif;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  .app{max-width:1280px;margin:0 auto;padding:22px 20px 70px;}
+
+  /* TOP BAR */
+  .top-bar{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;
+    background:linear-gradient(135deg, var(--blue-light), var(--blue-base));
+    display:flex;align-items:center;justify-content:center;font-size:18px;
+    box-shadow:0 4px 18px rgba(11,38,201,.55), inset 0 0 0 1px rgba(255,255,255,.25);
+  }
+  h1{font-weight:800;font-size:19px;margin:0;letter-spacing:-.01em;}
+  .brand-eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+
+  .top-bar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  button{font-family:inherit;cursor:pointer;border-radius:var(--radius-sm);}
+  .btn{
+    border:1.5px solid var(--panel-border);background:var(--panel);color:var(--ink);
+    padding:9px 14px;font-size:12.5px;font-weight:600;backdrop-filter:blur(6px);
+    transition:all .12s ease;
+  }
+  .btn:hover{background:rgba(255,255,255,.11);border-color:var(--panel-border-hover);}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:linear-gradient(135deg, var(--blue-light), var(--blue-base));border-color:transparent;box-shadow:0 4px 16px rgba(11,38,201,.5);}
+  .btn-primary:hover{filter:brightness(1.12);}
+  .btn-ghost{background:transparent;border:1.5px dashed var(--line);color:var(--ink-soft);}
+  .btn-ghost:hover{border-color:var(--ink-soft);color:var(--ink);}
+  .btn-danger{border-color:rgba(255,107,107,.5);color:var(--red);background:rgba(255,107,107,.08);}
+  .btn-danger:hover{background:rgba(255,107,107,.18);}
+  .btn-sm{padding:6px 10px;font-size:11px;}
+
+  .save-status{
+    font-size:10.5px;display:flex;align-items:center;gap:6px;color:var(--ink-soft);
+    padding:6px 10px;border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);background:var(--panel);backdrop-filter:blur(6px);
+  }
+  .save-status .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .save-status.ok .dot{background:var(--green);box-shadow:0 0 6px var(--green);}
+  .save-status.saving .dot{background:var(--amber);animation:pulse 1s infinite ease-in-out;}
+  .save-status.error .dot{background:var(--red);}
+  .save-status.error{border-color:rgba(255,107,107,.4);color:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  /* TOP TAB NAV */
+  .tab-nav{
+    display:flex;gap:6px;margin-bottom:22px;padding:6px;
+    background:var(--panel);border:1.5px solid var(--panel-border);border-radius:16px;backdrop-filter:blur(10px);
+    overflow-x:auto;
+  }
+  .tab-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;
+    padding:12px 10px;border:none;background:transparent;color:var(--ink-faint);
+    border-radius:12px;font-size:11.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    transition:all .15s ease;white-space:nowrap;min-width:78px;
+  }
+  .tab-btn .tab-icon{
+    font-size:19px;filter:grayscale(.4) brightness(.75);transition:all .15s ease;line-height:1;
+  }
+  .tab-btn:hover{color:var(--ink-soft);background:rgba(255,255,255,.05);}
+  .tab-btn.active{
+    color:var(--ink);background:rgba(255,255,255,.1);
+  }
+  .tab-btn.active .tab-icon{
+    filter:none;text-shadow:0 0 14px rgba(255,255,255,.9);
+    transform:scale(1.08);
+  }
+
+  /* CLIENT PICKER (used inside Configurações / Treinamento) */
+  .client-picker{
+    display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:18px;
+    background:var(--panel);border:1.5px solid var(--panel-border);border-radius:var(--radius);backdrop-filter:blur(10px);
+    flex-wrap:wrap;
+  }
+  .client-picker label{font-size:11px;color:var(--ink-faint);text-transform:uppercase;letter-spacing:.05em;font-weight:700;}
+  .client-picker select{
+    flex:1;min-width:180px;padding:9px 10px;font-family:inherit;font-size:13.5px;
+    background:rgba(255,255,255,.07);color:var(--ink);border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);
+  }
+  .client-picker select:focus{outline:none;border-color:var(--blue-light);}
+  .client-picker option{background:#0E1550;color:var(--ink);}
+
+  /* PANELS / CARDS */
+  .panel{
+    background:var(--panel);border:1.5px solid var(--panel-border);border-radius:var(--radius);
+    padding:20px 22px;backdrop-filter:blur(10px);
+  }
+  .placeholder{
+    background:var(--panel);border:1.5px dashed var(--panel-border);border-radius:var(--radius);
+    padding:60px 30px;text-align:center;color:var(--ink-soft);
+  }
+  .placeholder h2{color:var(--ink);margin-top:0;font-weight:800;}
+  .placeholder .btn{margin-top:14px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:900px){.two-col{grid-template-columns:1fr;}}
+
+  .section-title{
+    display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;
+    letter-spacing:.02em;margin:0 0 14px;
+  }
+  .section-title .icon{font-size:19px;}
+  .section-sub{font-size:12px;color:var(--ink-faint);margin:-8px 0 18px;line-height:1.5;}
+
+  /* CLIENTES TAB — list */
+  .client-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(230px,1fr));gap:12px;}
+  .client-card-tile{
+    background:var(--panel);border:1.5px solid var(--panel-border);border-radius:var(--radius);
+    padding:16px;cursor:pointer;transition:all .15s ease;backdrop-filter:blur(10px);
+  }
+  .client-card-tile:hover{border-color:var(--panel-border-hover);background:rgba(255,255,255,.09);transform:translateY(-1px);}
+  .client-card-tile .seg-tag{
+    display:inline-flex;align-items:center;gap:5px;font-size:10px;text-transform:uppercase;
+    letter-spacing:.04em;color:var(--ink-faint);margin-bottom:8px;font-weight:700;
+  }
+  .client-card-tile .dot{width:7px;height:7px;border-radius:50%;}
+  .client-card-tile h4{margin:0 0 10px;font-size:15px;font-weight:700;}
+  .client-progress-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-soft);}
+  .mini-bar{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;}
+  .mini-bar-fill{height:100%;background:linear-gradient(90deg, var(--blue-light), var(--green));border-radius:3px;}
+
+  .search-row{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+  .search-input{
+    flex:1;min-width:200px;padding:11px 14px;font-family:inherit;font-size:13.5px;
+    background:var(--panel);color:var(--ink);border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);
+  }
+  .search-input::placeholder{color:var(--ink-faint);}
+  .search-input:focus{outline:none;border-color:var(--blue-light);}
+
+  /* CLIENT DETAIL (within Clientes tab) */
+  .client-detail{margin-top:20px;}
+  .client-detail-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;}
+  .client-title-eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:4px;font-weight:700;}
+  .client-title{font-size:24px;font-weight:800;margin:0 0 6px;}
+  .client-meta{font-size:12.5px;color:var(--ink-soft);}
+  .client-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+
+  .stamp{
+    width:96px;height:96px;border-radius:50%;
+    border:3px solid var(--panel-border);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    flex-shrink:0;transition:all .25s ease;background:rgba(255,255,255,.04);
+  }
+  .stamp .pct{font-size:21px;font-weight:800;line-height:1;}
+  .stamp .lbl{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;margin-top:2px;color:var(--ink-faint);}
+  .stamp.mid{border-color:var(--amber);color:var(--amber);}
+  .stamp.low{border-color:var(--panel-border);color:var(--ink-soft);}
+  .stamp.done{border-color:var(--green);color:var(--green);box-shadow:0 0 0 4px rgba(56,211,159,.14), 0 0 20px rgba(56,211,159,.25);}
+
+  .mini-stamp{width:56px;height:56px;font-size:0;}
+  .mini-stamp .pct{font-size:13px;}
+  .mini-stamp .lbl{display:none;}
+
+  .jump-links{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+
+  /* MANAGER-STYLE CARDS (segments, systems) */
+  .manager-card{
+    background:rgba(255,255,255,.035);border:1.5px solid var(--panel-border);border-radius:var(--radius);
+    padding:16px 16px 8px;margin-bottom:16px;
+  }
+  .manager-card.standard{border-color:rgba(242,179,61,.4);background:rgba(242,179,61,.06);}
+  .manager-card-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px;flex-wrap:wrap;}
+  .manager-card-head h3{font-size:13.5px;margin:0;text-transform:uppercase;letter-spacing:.03em;font-weight:800;}
+  .manager-card-meta{font-size:11px;color:var(--ink-faint);margin-bottom:10px;}
+  .add-group-row, .add-item-row, .add-section-row{display:flex;gap:8px;margin:12px 0 4px;}
+  .add-group-row{padding:10px;background:rgba(255,255,255,.04);border:1.5px dashed var(--panel-border);border-radius:var(--radius-sm);}
+  .add-group-row input, .add-item-row input, .add-section-row input{
+    flex:1;padding:9px 10px;font-family:inherit;font-size:12.5px;
+    background:rgba(255,255,255,.06);color:var(--ink);border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);
+  }
+  .add-group-row input::placeholder, .add-item-row input::placeholder{color:var(--ink-faint);}
+  .add-group-row input:focus, .add-item-row input:focus{outline:none;border-color:var(--blue-light);}
+
+  .segment-card-list{display:grid;grid-template-columns:repeat(auto-fill, minmax(260px,1fr));gap:14px;}
+
+  /* CHECK ROWS */
+  .check-item, .manager-item{border-bottom:1px solid rgba(255,255,255,.08);}
+  .check-item:last-child, .manager-item:last-child{border-bottom:none;}
+  .check-item .check-row, .manager-item .check-row{border-bottom:none;}
+
+  .check-row{
+    display:flex;align-items:center;gap:12px;padding:9px 8px;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .check-row:last-child{border-bottom:none;}
+  .check-row input[type=checkbox]{
+    width:20px;height:20px;flex-shrink:0;accent-color:var(--green);cursor:pointer;
+  }
+  .check-row label{flex:1;font-size:13.5px;cursor:pointer;color:var(--ink);}
+  .check-row.checked label{color:var(--ink-faint);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25);}
+  .row-actions{display:flex;gap:2px;opacity:0;flex-shrink:0;transition:opacity .12s ease;}
+  .check-row:hover .row-actions, .manager-item:hover .row-actions{opacity:1;}
+  .del-item, .edit-item{font-size:10.5px;background:none;border:none;padding:3px 7px;cursor:pointer;border-radius:6px;}
+  .del-item{color:var(--red);}
+  .del-item:hover{background:rgba(255,107,107,.14);}
+  .edit-item{color:var(--ink-soft);}
+  .edit-item:hover{background:rgba(255,255,255,.1);color:var(--ink);}
+  .check-row.editing{gap:8px;background:rgba(255,255,255,.05);border-radius:var(--radius-sm);}
+  .check-row.editing input[type=text]{
+    flex:1;padding:7px 9px;font-family:inherit;font-size:13px;
+    background:rgba(255,255,255,.08);color:var(--ink);border:1.5px solid var(--blue-light);border-radius:var(--radius-sm);
+  }
+  .check-row.editing input[type=text]:focus{outline:none;}
+  .save-item{color:var(--green);}
+  .save-item:hover{background:rgba(56,211,159,.14);}
+  .cancel-item{color:var(--ink-faint);}
+  .cancel-item:hover{background:rgba(255,255,255,.08);}
+
+  .no-items{font-size:12px;color:var(--ink-faint);padding:8px;font-style:italic;}
+
+  /* Manager screen subtítulos editor */
+  .tab-expand-btn{
+    display:flex;align-items:center;gap:6px;padding:4px 8px 10px 8px;cursor:pointer;
+    font-size:10.5px;color:var(--ink-faint);
+  }
+  .tab-expand-btn:hover{color:var(--ink-soft);}
+  .tab-expand-btn .chevron{font-size:9px;transition:transform .15s ease;}
+  .tab-expand-btn.open .chevron{transform:rotate(90deg);}
+  .tab-expand-btn.open{color:var(--amber);font-weight:700;}
+  .manager-subitems{
+    margin:0 0 12px 18px;padding:8px 10px 4px;background:rgba(255,255,255,.035);
+    border-left:2px solid var(--amber);border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  }
+  .manager-subitems .check-row{padding:6px 4px;}
+  .manager-subitems .check-row label{font-size:12.5px;}
+
+  /* Client-facing checklist "aba" (tab) with subtítulos */
+  .tab-row{
+    display:flex;align-items:center;gap:10px;padding:11px 10px;cursor:pointer;
+    border-radius:var(--radius-sm);transition:background .12s ease;
+  }
+  .tab-row:hover{background:rgba(255,255,255,.06);}
+  .tab-row .chevron{font-size:11px;color:var(--ink-faint);transition:transform .15s ease;flex-shrink:0;}
+  .tab-row.open .chevron{transform:rotate(90deg);}
+  .tab-row .tab-label{flex:1;font-size:13.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;}
+  .tab-row .badge{
+    font-size:10.5px;color:var(--ink-soft);background:rgba(255,255,255,.08);
+    border:1px solid var(--panel-border);border-radius:20px;padding:2px 9px;flex-shrink:0;
+  }
+  .tab-row.open{background:rgba(255,255,255,.06);}
+  .tab-body{
+    padding:4px 8px 12px 27px;border-left:2px solid rgba(255,255,255,.15);margin-left:16px;
+    display:grid;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:0;
+  }
+  .tab-body .check-row{padding:6px 4px;border-bottom:none;}
+  .tab-body .check-row label{font-size:13px;}
+
+  .group-head{display:flex;align-items:center;gap:8px;margin:16px 0 8px;}
+  .group-head:first-of-type{margin-top:2px;}
+  .group-head h4{font-size:11.5px;font-weight:800;letter-spacing:.04em;margin:0;color:var(--ink-faint);text-transform:uppercase;white-space:nowrap;}
+  .group-head .rule{flex:1;height:1px;background:rgba(255,255,255,.1);}
+  .group-head .badge{font-size:10px;color:var(--ink-faint);background:rgba(255,255,255,.06);border:1px solid var(--panel-border);border-radius:20px;padding:0 7px;}
+
+  .col-header{
+    display:flex;align-items:center;gap:9px;font-weight:800;font-size:14.5px;text-transform:uppercase;
+    letter-spacing:.03em;padding-bottom:12px;margin-bottom:8px;border-bottom:2px solid currentColor;
+  }
+  .col-header.config{color:var(--amber);}
+  .col-header.train{color:var(--green);}
+  .col-header .badge{
+    margin-left:auto;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;
+    color:var(--ink-soft);background:rgba(255,255,255,.07);border:1px solid var(--panel-border);border-radius:20px;padding:2px 9px;
+  }
+
+  .empty-training-hint{
+    font-size:12.5px;color:var(--ink-faint);padding:16px;text-align:center;
+    border:1.5px dashed var(--panel-border);border-radius:var(--radius-sm);
+  }
+
+  /* MODAL */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(3,6,32,.7);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;
+  }
+  .modal{
+    background:#0E1550;border:1.5px solid var(--panel-border);border-radius:var(--radius);
+    width:100%;max-width:440px;padding:22px;max-height:88vh;overflow-y:auto;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal h3{font-size:17px;margin:0 0 4px;font-weight:800;}
+  .modal p.hint{font-size:12px;color:var(--ink-faint);margin:0 0 16px;line-height:1.5;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-faint);margin-bottom:6px;font-weight:700;}
+  .field input, .field select{
+    width:100%;padding:10px 11px;font-family:inherit;font-size:13.5px;
+    background:rgba(255,255,255,.06);color:var(--ink);border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);
+  }
+  .field input:focus, .field select:focus{outline:none;border-color:var(--blue-light);}
+  .field select option{background:#0E1550;}
+  .checkbox-list{border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);background:rgba(255,255,255,.04);max-height:180px;overflow-y:auto;}
+  .checkbox-list label{
+    display:flex;align-items:center;gap:8px;padding:9px 10px;font-size:13px;cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .checkbox-list label:last-child{border-bottom:none;}
+  .checkbox-list input{width:16px;height:16px;accent-color:var(--green);}
+  .checkbox-list .empty{padding:10px;font-size:12px;color:var(--ink-faint);font-style:italic;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+
+  .swatch-row{display:flex;gap:8px;margin-top:4px;}
+  .swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;}
+  .swatch.selected{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.3);}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#0E1550;color:var(--ink);padding:11px 18px;border-radius:var(--radius-sm);
+    font-size:12.5px;z-index:100;opacity:0;transition:opacity .25s ease;pointer-events:none;
+    border:1.5px solid var(--panel-border);box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  .toast.show{opacity:1;}
+
+  .loading-msg{padding:60px;text-align:center;color:var(--ink-soft);font-size:13px;}
+
+  /* ===================== MOBILE (iPhone) ===================== */
+  .mobile-back-btn{
+    display:none;width:100%;margin-bottom:14px;padding:11px 14px;
+    font-size:13px;font-weight:700;
+    background:var(--panel);border:1.5px solid var(--panel-border);border-radius:var(--radius-sm);color:var(--ink);
+    cursor:pointer;text-align:left;
+  }
+  .mobile-back-btn:active{background:rgba(255,255,255,.15);}
+
+  @media (max-width:780px){
+    .app{padding:calc(12px + env(safe-area-inset-top)) 12px calc(30px + env(safe-area-inset-bottom));}
+    .top-bar{
+      position:sticky;top:0;z-index:20;
+      margin:calc(-12px - env(safe-area-inset-top)) -12px 14px;
+      padding:calc(10px + env(safe-area-inset-top)) 12px 10px;
+      background:linear-gradient(180deg, var(--blue-deep) 70%, transparent);
+    }
+    h1{font-size:16px;}
+    .btn{padding:9px 11px;font-size:11.5px;}
+    .top-bar-actions .save-status{order:5;width:100%;justify-content:center;margin-top:4px;}
+
+    .tab-nav{position:sticky;top:calc(54px + env(safe-area-inset-top));z-index:19;}
+    .tab-btn{font-size:9.5px;padding:9px 4px;min-width:0;}
+    .tab-btn .tab-icon{font-size:17px;}
+
+    .two-col{grid-template-columns:1fr;gap:14px;}
+    .panel{padding:16px 14px;}
+    .client-grid{grid-template-columns:1fr 1fr;}
+    .segment-card-list{grid-template-columns:1fr;}
+
+    .check-row{padding:12px 4px;gap:10px;}
+    .check-row input[type=checkbox]{width:24px;height:24px;}
+    .check-row label{font-size:14.5px;line-height:1.4;}
+    .tab-row{padding:12px 8px;gap:8px;}
+    .tab-row .tab-label{font-size:13px;}
+    .tab-body{padding-left:22px;margin-left:12px;grid-template-columns:1fr;}
+
+    .client-title{font-size:19px;}
+    .stamp{width:78px;height:78px;}
+    .stamp .pct{font-size:18px;}
+    .client-actions .btn-sm, .jump-links .btn-sm{flex:1;text-align:center;min-height:42px;}
+
+    input, select, textarea{font-size:16px !important;}
+
+    .modal{max-width:none;width:100%;max-height:92vh;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom));}
+    .modal-overlay{padding:0;align-items:flex-end;}
+    .modal-actions .btn{flex:1;min-height:42px;}
+
+    .toast{bottom:calc(16px + env(safe-area-inset-bottom));width:calc(100% - 24px);text-align:center;}
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading-msg" id="loading">Carregando dados…</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  const CLIENT_COLORS = ['#F2B33D','#38D39F','#FF6B6B','#8DA3FF','#D99A22','#9B7BFF'];
+  const STORAGE_KEY = 'installer-checklist-data-v1';
+
+  // ---------------------------------------------------------------------
+  // DATA MODEL (unchanged from the previous version)
+  //   standardConfig: [{id, texto, subItems:[{id,texto}]}]
+  //   segments: [{id, name, color, extraConfig:[{id,texto,subItems}]}]
+  //   systems:  [{id, name, topics:[{id,texto,subItems}]}]
+  //   clients:  [{id, name, segmentId, systemIds:[...], info,
+  //               checklistConfig:{leafId:bool}, checklistTraining:{leafId:bool}}]
+  // ---------------------------------------------------------------------
+
+  function freshDefaultState(){
+    return {
+      standardConfig: [
+        {id: uid('cfg'), texto:'Configuração de formas de pagamento', subItems:[]},
+        {id: uid('cfg'), texto:'Configuração de backup automático', subItems:[]},
+      ],
+      segments: [
+        { id: uid('seg'), name:'Material de Construção', color:'#F2B33D', extraConfig: [
+          {id: uid('cfg'), texto:'Cadastro de produtos e unidades (un, m², m³, kg)', subItems:[]},
+          {id: uid('cfg'), texto:'Configuração de orçamentos e pedidos', subItems:[]},
+          {id: uid('cfg'), texto:'Configuração de impressora fiscal / não fiscal', subItems:[]},
+        ]},
+        { id: uid('seg'), name:'Oficina', color:'#38D39F', extraConfig: [
+          {id: uid('cfg'), texto:'Configuração de ordem de serviço (O.S.)', subItems:[]},
+          {id: uid('cfg'), texto:'Cadastro de veículos e clientes', subItems:[]},
+          {id: uid('cfg'), texto:'Cadastro de peças e serviços', subItems:[]},
+        ]},
+        { id: uid('seg'), name:'Mercearia', color:'#FF6B6B', extraConfig: [
+          {id: uid('cfg'), texto:'Configuração de balança e leitor de código de barras', subItems:[]},
+          {id: uid('cfg'), texto:'Cadastro de produtos por peso e unidade', subItems:[]},
+          {id: uid('cfg'), texto:'Configuração de controle de validade', subItems:[]},
+        ]},
+      ],
+      systems: [
+        { id: uid('sys'), name:'Sistema Principal (edite o nome, ex: Integra)', topics: [
+          {id: uid('top'), texto:'Venda no PDV', subItems:[]},
+          {id: uid('top'), texto:'Fechamento de caixa', subItems:[]},
+          {id: uid('top'), texto:'Cadastro de produtos', subItems:[]},
+          {id: uid('top'), texto:'Emissão de orçamento / O.S.', subItems:[]},
+        ]}
+      ],
+      clients: []
+    };
+  }
+
+  let state = { standardConfig: [], segments: [], systems: [], clients: [] };
+  let activeTab = 'clientes'; // 'segmentos' | 'clientes' | 'treinamento' | 'configuracoes'
+  let selectedClientId = null;
+  let sidebarFilter = '';
+  let modal = null;
+  let saveStatus = { state:'idle', message:'', time:null };
+  let storageAvailable = true;
+
+  // inline-edit tracking
+  let editingStdItemKey = null;     // itemId
+  let editingSegItemKey = null;     // "segId|itemId"
+  let editingSegNameKey = null;     // segId
+  let editingSystemNameKey = null;  // sysId
+  let editingTopicKey = null;       // "sysId|topicId"
+  let expandedItems = new Set();    // "clientId|itemId" — client-facing tab open/closed
+  let expandedManagerItems = new Set(); // itemId — manager subtítulos editor open/closed
+  let editingSubItemKey = null;     // "itemId|subItemId"
+
+  const app = document.getElementById('app');
+
+  function uid(prefix){ return prefix + '_' + Math.random().toString(36).slice(2,10); }
+
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._h);
+    showToast._h = setTimeout(()=>t.classList.remove('show'), 1800);
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : str;
+    return d.innerHTML;
+  }
+
+  // ---------------------------------------------------------------------
+  // LOAD / MIGRATE / PERSIST
+  // ---------------------------------------------------------------------
+
+  async function loadData(){
+    if(typeof window.storage === 'undefined' || !window.storage){
+      storageAvailable = false;
+      saveStatus = { state:'error', message:'Armazenamento indisponível neste ambiente. Seus dados ficam só nesta sessão — use "Backup" para não perder o trabalho.', time:null };
+      state = freshDefaultState();
+      render();
+      return;
+    }
+    try{
+      const res = await window.storage.get(STORAGE_KEY, false);
+      if(res && res.value){
+        const raw = JSON.parse(res.value);
+        state = migrateToCurrentShape(raw);
+      } else {
+        state = freshDefaultState();
+        await persist();
+      }
+    }catch(e){
+      console.error('Falha ao carregar/migrar dados salvos', e);
+      state = freshDefaultState();
+      try{ await persist(); }catch(e2){ console.error('Falha ao salvar dados iniciais', e2); }
+    }
+    render();
+  }
+
+  function withSubItems(list){ return (list||[]).map(it=>({ ...it, subItems: it.subItems||[] })); }
+
+  function migrateToCurrentShape(raw){
+    if(raw && Array.isArray(raw.standardConfig) && Array.isArray(raw.systems)){
+      raw.standardConfig = withSubItems(raw.standardConfig);
+      raw.systems = (raw.systems||[]).map(s=>({ id:s.id, name:s.name, topics: withSubItems(s.topics) }));
+      raw.segments = (raw.segments||[]).map(s=>({ id:s.id, name:s.name, color:s.color, extraConfig: withSubItems(s.extraConfig) }));
+      raw.clients = (raw.clients||[]).map(c=>({
+        id:c.id, name:c.name, segmentId:c.segmentId, info:c.info||'',
+        systemIds: c.systemIds||[], checklistConfig: c.checklistConfig||{}, checklistTraining: c.checklistTraining||{}
+      }));
+      return raw;
+    }
+    try{
+      return migrateLegacyToCurrentShape(raw);
+    }catch(e){
+      console.error('Falha ao migrar formato antigo, iniciando com dados padrão', e);
+      return freshDefaultState();
+    }
+  }
+
+  function migrateLegacyToCurrentShape(raw){
+    const oldSegments = normalizeLegacySegments(raw && raw.segments || []);
+    const idRemap = {};
+    const newSegments = [];
+    const systemsMap = new Map();
+
+    oldSegments.forEach(oldSeg=>{
+      const newSeg = { id: oldSeg.id || uid('seg'), name: oldSeg.name || 'Segmento', color: oldSeg.color || CLIENT_COLORS[0], extraConfig: [] };
+      const seenConfigText = new Map();
+      (oldSeg.sections||[]).forEach(sec=>{
+        const sysKey = (sec.name || 'Sistema').trim().toLowerCase();
+        (sec.subsections||[]).forEach(sub=>{
+          const isTraining = /trein/i.test(sub.name || '');
+          (sub.items||[]).forEach(it=>{
+            const key = (it.texto||'').trim().toLowerCase();
+            if(!key) return;
+            if(isTraining){
+              let sys = systemsMap.get(sysKey);
+              if(!sys){ sys = { id: uid('sys'), name: sec.name || 'Sistema', topics: [] }; systemsMap.set(sysKey, sys); }
+              const dup = sys.topics.find(t=>t.texto.trim().toLowerCase()===key);
+              if(dup){ idRemap[it.id] = dup.id; }
+              else{ sys.topics.push({id: it.id, texto: it.texto, subItems: []}); }
+            } else {
+              if(seenConfigText.has(key)){ idRemap[it.id] = seenConfigText.get(key); }
+              else{ newSeg.extraConfig.push({id: it.id, texto: it.texto, subItems: []}); seenConfigText.set(key, it.id); }
+            }
+          });
+        });
+      });
+      newSegments.push(newSeg);
+    });
+
+    const standardConfig = [];
+    if(newSegments.length >= 2){
+      const countByText = new Map();
+      newSegments.forEach(seg=>{
+        const seen = new Set();
+        seg.extraConfig.forEach(it=>{
+          const key = it.texto.trim().toLowerCase();
+          if(!seen.has(key)){ countByText.set(key, (countByText.get(key)||0)+1); seen.add(key); }
+        });
+      });
+      const universalKeys = new Set(Array.from(countByText.entries()).filter(([,c])=>c===newSegments.length).map(([k])=>k));
+      universalKeys.forEach(key=>{
+        let keptId = null;
+        newSegments.forEach(seg=>{
+          const idx = seg.extraConfig.findIndex(it=>it.texto.trim().toLowerCase()===key);
+          if(idx>=0){
+            const item = seg.extraConfig[idx];
+            if(keptId===null){ keptId = item.id; standardConfig.push({id:item.id, texto:item.texto, subItems:[]}); }
+            else{ idRemap[item.id] = keptId; }
+            seg.extraConfig.splice(idx,1);
+          }
+        });
+      });
+    }
+
+    const systems = Array.from(systemsMap.values());
+    const stdIds = new Set(standardConfig.map(i=>i.id));
+    const segExtraIds = new Set(); newSegments.forEach(s=>s.extraConfig.forEach(i=>segExtraIds.add(i.id)));
+    const topicToSystem = new Map(); systems.forEach(s=>s.topics.forEach(t=>topicToSystem.set(t.id, s.id)));
+
+    const newClients = (raw && raw.clients || []).map(oldClient=>{
+      const checklistConfig = {};
+      const checklistTraining = {};
+      const systemIds = new Set();
+      Object.entries(oldClient.checklist||{}).forEach(([oldId, val])=>{
+        const rid = idRemap[oldId] || oldId;
+        if(stdIds.has(rid) || segExtraIds.has(rid)){ checklistConfig[rid] = val; }
+        else if(topicToSystem.has(rid)){ checklistTraining[rid] = val; systemIds.add(topicToSystem.get(rid)); }
+      });
+      return {
+        id: oldClient.id || uid('cli'), name: oldClient.name || 'Cliente', segmentId: oldClient.segmentId,
+        info: oldClient.info || '', systemIds: Array.from(systemIds),
+        checklistConfig, checklistTraining
+      };
+    });
+
+    return { standardConfig, segments: newSegments, systems, clients: newClients };
+  }
+
+  function normalizeLegacySegments(segments){
+    return (segments||[]).map(seg=>{
+      if(Array.isArray(seg.sections)){
+        const sections = seg.sections.map(sec=>{
+          if(Array.isArray(sec.subsections)) return sec;
+          if(Array.isArray(sec.items)){
+            return { id: sec.id, name: sec.name, subsections: [ { id: uid('sub'), name: sec.name, items: sec.items } ] };
+          }
+          return { id: sec.id, name: sec.name, subsections: [] };
+        });
+        return { id: seg.id, name: seg.name, color: seg.color, sections };
+      }
+      if(Array.isArray(seg.items)){
+        const instalacao = seg.items.filter(i=>i.tipo!=='treinamento').map(i=>({id:i.id, texto:i.texto}));
+        const treinamento = seg.items.filter(i=>i.tipo==='treinamento').map(i=>({id:i.id, texto:i.texto}));
+        return { id: seg.id, name: seg.name, color: seg.color, sections: [
+          { id: uid('sec'), name:'Sistema', subsections: [
+            { id: uid('sub'), name:'Instalação / Configuração', items: instalacao },
+            { id: uid('sub'), name:'Treinamento', items: treinamento }
+          ]}
+        ]};
+      }
+      return { id: seg.id, name: seg.name, color: seg.color, sections: [] };
+    });
+  }
+
+  async function persist(){
+    if(!storageAvailable) return;
+    saveStatus = { state:'saving', message:'', time: saveStatus.time };
+    render();
+    try{
+      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      if(!result){
+        saveStatus = { state:'error', message:'O armazenamento não confirmou o salvamento.', time:new Date() };
+        console.error('Storage set returned no result', result);
+      } else {
+        saveStatus = { state:'ok', message:'', time:new Date() };
+      }
+    }catch(e){
+      console.error('Erro ao salvar no armazenamento', e);
+      const reason = (e && (e.message || String(e))) || 'erro desconhecido';
+      saveStatus = { state:'error', message:reason, time:new Date() };
+    }
+  }
+
+  function downloadBackup(){
+    try{
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0,10);
+      a.href = url;
+      a.download = `checklist-instalacao-backup-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Backup baixado.');
+    }catch(e){
+      console.error('Erro ao exportar backup', e);
+      showToast('⚠ Não foi possível gerar o backup.');
+    }
+  }
+
+  function triggerImportBackup(){
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/json';
+    input.addEventListener('change', ()=>{
+      const file = input.files && input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = async ()=>{
+        try{
+          const parsed = JSON.parse(reader.result);
+          if(!parsed || typeof parsed !== 'object'){
+            showToast('⚠ Arquivo de backup inválido.');
+            return;
+          }
+          state = migrateToCurrentShape(parsed);
+          selectedClientId = null;
+          await persist();
+          render();
+          showToast('Backup importado com sucesso.');
+        }catch(e){
+          console.error('Erro ao importar backup', e);
+          showToast('⚠ Não foi possível ler esse arquivo.');
+        }
+      };
+      reader.readAsText(file);
+    });
+    input.click();
+  }
+
+  // ---------------------------------------------------------------------
+  // HELPERS
+  // ---------------------------------------------------------------------
+
+  function getSegment(id){ return state.segments.find(s=>s.id===id); }
+  function getSystem(id){ return state.systems.find(s=>s.id===id); }
+  function getClient(id){ return state.clients.find(c=>c.id===id); }
+
+  function leafItems(items){
+    return items.flatMap(it => (it.subItems && it.subItems.length) ? it.subItems : [it]);
+  }
+
+  function locateItem(itemId){
+    let found = state.standardConfig.find(i=>i.id===itemId);
+    if(found) return found;
+    for(const seg of state.segments){
+      found = seg.extraConfig.find(i=>i.id===itemId);
+      if(found) return found;
+    }
+    for(const sys of state.systems){
+      found = sys.topics.find(i=>i.id===itemId);
+      if(found) return found;
+    }
+    return null;
+  }
+
+  function clientConfigItems(client){
+    const seg = getSegment(client.segmentId);
+    return { standard: state.standardConfig, extra: seg ? seg.extraConfig : [] };
+  }
+
+  function clientTrainingSystems(client){
+    return (client.systemIds||[]).map(id=>getSystem(id)).filter(Boolean);
+  }
+
+  function clientProgress(client){
+    const { standard, extra } = clientConfigItems(client);
+    const configLeaves = leafItems([...standard, ...extra]);
+    const configTotal = configLeaves.length;
+    const configDone = configLeaves.filter(it=>client.checklistConfig[it.id]).length;
+
+    const trainSystems = clientTrainingSystems(client);
+    const trainLeaves = leafItems(trainSystems.flatMap(s=>s.topics));
+    const trainTotal = trainLeaves.length;
+    const trainDone = trainLeaves.filter(it=>client.checklistTraining[it.id]).length;
+
+    const total = configTotal + trainTotal;
+    const done = configDone + trainDone;
+    return {
+      pct: total ? Math.round(done/total*100) : 0,
+      done, total,
+      configDone, configTotal,
+      trainDone, trainTotal
+    };
+  }
+
+  // ---------------------------------------------------------------------
+  // SHARED: manager-style item row with expandable subtítulos editor
+  // ---------------------------------------------------------------------
+
+  function renderManagerSubItemRow(itemId, si){
+    const key = itemId + '|' + si.id;
+    if(editingSubItemKey === key){
+      return `<div class="check-row editing">
+        <input type="text" id="editSubItemInput_${si.id}" value="${escapeHtml(si.texto)}" data-edit-subitem-input="${key}">
+        <div class="row-actions" style="opacity:1;">
+          <button class="save-item" data-save-subitem="${key}">salvar</button>
+          <button class="cancel-item" data-cancel-subitem="${key}">cancelar</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="check-row">
+      <label style="flex:1;">${escapeHtml(si.texto)}</label>
+      <div class="row-actions">
+        <button class="edit-item" data-edit-subitem="${key}">editar</button>
+        <button class="del-item" data-del-subitem="${key}">remover</button>
+      </div>
+    </div>`;
+  }
+
+  function renderSubItemsBlock(it){
+    const subItems = it.subItems || [];
+    const isOpen = expandedManagerItems.has(it.id);
+    return `
+      <div class="tab-expand-btn ${isOpen?'open':''}" data-toggle-manager-item="${it.id}">
+        <span class="chevron">▸</span>${subItems.length} subtítulo(s) — clique para ${isOpen?'fechar':'abrir'}
+      </div>
+      ${isOpen ? `
+        <div class="manager-subitems">
+          ${subItems.length ? subItems.map(si=>renderManagerSubItemRow(it.id, si)).join('') : `<div class="no-items">Nenhum subtítulo ainda — esta aba aparece como um item simples até você adicionar um.</div>`}
+          <div class="add-item-row">
+            <input type="text" placeholder="Novo subtítulo (o que foi feito nesta tela)…" data-new-subitem-input="${it.id}">
+            <button class="btn btn-sm" data-new-subitem-btn="${it.id}">Adicionar</button>
+          </div>
+        </div>
+      ` : ''}
+    `;
+  }
+
+  function managerItemRow(kind, groupId, it){
+    const key = kind==='std' ? it.id : `${groupId}|${it.id}`;
+    const editingKey = kind==='topic' ? editingTopicKey : (kind==='std' ? editingStdItemKey : editingSegItemKey);
+    const isEditing = editingKey === key;
+    const editAttr = kind==='std' ? 'data-edit-std-item' : kind==='topic' ? 'data-edit-topic' : 'data-edit-seg-item';
+    const delAttr = kind==='std' ? 'data-del-std-item' : kind==='topic' ? 'data-del-topic' : 'data-del-seg-item';
+    const saveAttr = kind==='std' ? 'data-save-std-item' : kind==='topic' ? 'data-save-topic' : 'data-save-seg-item';
+    const cancelAttr = kind==='std' ? 'data-cancel-std-item' : kind==='topic' ? 'data-cancel-topic' : 'data-cancel-seg-item';
+    const inputAttr = kind==='std' ? 'data-edit-std-input' : kind==='topic' ? 'data-edit-topic-input' : 'data-edit-seg-input';
+    if(isEditing){
+      return `<div class="manager-item"><div class="check-row editing">
+        <input type="text" id="editItemInput_${kind}_${it.id}" value="${escapeHtml(it.texto)}" ${inputAttr}="${key}">
+        <div class="row-actions" style="opacity:1;">
+          <button class="save-item" ${saveAttr}="${key}">salvar</button>
+          <button class="cancel-item" ${cancelAttr}="${key}">cancelar</button>
+        </div>
+      </div></div>`;
+    }
+    return `<div class="manager-item">
+      <div class="check-row">
+        <label style="flex:1;">${escapeHtml(it.texto)}</label>
+        <div class="row-actions">
+          <button class="edit-item" ${editAttr}="${key}">editar</button>
+          <button class="del-item" ${delAttr}="${key}">remover</button>
+        </div>
+      </div>
+      ${renderSubItemsBlock(it)}
+    </div>`;
+  }
+
+  // Client-facing checklist rows (checkbox leaves, or an expandable "aba" when the item has subtítulos)
+  function checklistRows(client, items, checklistMap, target){
+    if(items.length===0) return `<div class="no-items">Nenhum item cadastrado.</div>`;
+    return items.map(it=>{
+      const subItems = it.subItems || [];
+      const expandKey = client.id + '|' + it.id;
+
+      if(subItems.length === 0){
+        const checked = !!checklistMap[it.id];
+        return `
+          <div class="check-row ${checked?'checked':''}">
+            <input type="checkbox" id="chk_${it.id}" data-check-item="${it.id}" data-check-target="${target}" ${checked?'checked':''}>
+            <label for="chk_${it.id}">${escapeHtml(it.texto)}</label>
+          </div>
+        `;
+      }
+
+      const done = subItems.filter(si=>checklistMap[si.id]).length;
+      const isOpen = expandedItems.has(expandKey);
+      return `
+        <div class="check-item">
+          <div class="tab-row ${isOpen?'open':''}" data-toggle-tab="${it.id}">
+            <span class="chevron">▸</span>
+            <span class="tab-label">${escapeHtml(it.texto)}</span>
+            <span class="badge">${done}/${subItems.length}</span>
+          </div>
+          ${isOpen ? `
+            <div class="tab-body">
+              ${subItems.map(si=>{
+                const checked = !!checklistMap[si.id];
+                return `
+                  <div class="check-row ${checked?'checked':''}">
+                    <input type="checkbox" id="chk_${si.id}" data-check-item="${si.id}" data-check-target="${target}" ${checked?'checked':''}>
+                    <label for="chk_${si.id}">${escapeHtml(si.texto)}</label>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function progressStampHtml(p, extraClass){
+    const stampClass = p.pct===100 ? 'done' : (p.pct>=40 ? 'mid' : 'low');
+    const label = p.pct===100 ? 'concluído' : `${p.done}/${p.total}`;
+    return `<div class="stamp ${stampClass} ${extraClass||''}"><div class="pct">${p.pct}%</div><div class="lbl">${label}</div></div>`;
+  }
+
+  // ---------------------------------------------------------------------
+  // RENDER
+  // ---------------------------------------------------------------------
+
+  function renderSaveStatus(){
+    if(saveStatus.state==='idle'){
+      return `<span class="save-status"><span class="dot" style="background:rgba(255,255,255,.3);"></span>Sem alterações</span>`;
+    }
+    if(saveStatus.state==='saving'){
+      return `<span class="save-status saving"><span class="dot"></span>Salvando…</span>`;
+    }
+    if(saveStatus.state==='ok'){
+      const t = saveStatus.time ? saveStatus.time.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) : '';
+      return `<span class="save-status ok"><span class="dot"></span>Salvo às ${t}</span>`;
+    }
+    return `<span class="save-status error" title="${escapeHtml(saveStatus.message||'')}"><span class="dot"></span>Não salvou</span>`;
+  }
+
+  const TABS = [
+    {id:'segmentos', label:'Segmentos', icon:'🏷️'},
+    {id:'clientes', label:'Clientes', icon:'👥'},
+    {id:'treinamento', label:'Treinamento', icon:'🎓'},
+    {id:'configuracoes', label:'Configurações', icon:'⚙️'},
+  ];
+
+  function render(){
+    document.getElementById('loading') && document.getElementById('loading').remove();
+
+    app.innerHTML = `
+      <div class="top-bar">
+        <div class="brand">
+          <div class="brand-mark">📋</div>
+          <div>
+            <div class="brand-eyebrow">Ficha técnica de atendimento</div>
+            <h1>Checklist de Instalação</h1>
+          </div>
+        </div>
+        <div class="top-bar-actions">
+          ${renderSaveStatus()}
+          <button class="btn btn-sm" id="btnDownloadBackup">⤓ Backup</button>
+          <button class="btn btn-sm" id="btnImportBackup">⤒ Importar</button>
+        </div>
+      </div>
+
+      <nav class="tab-nav">
+        ${TABS.map(t=>`
+          <button class="tab-btn ${activeTab===t.id?'active':''}" data-tab="${t.id}">
+            <span class="tab-icon">${t.icon}</span>${t.label}
+          </button>
+        `).join('')}
+      </nav>
+
+      <div class="tab-content">${renderActiveTab()}</div>
+    `;
+
+    attachEvents();
+    if(modal) renderModal();
+  }
+
+  function renderActiveTab(){
+    if(activeTab==='segmentos') return renderSegmentosTab();
+    if(activeTab==='clientes') return renderClientesTab();
+    if(activeTab==='treinamento') return renderChecklistTab('training');
+    if(activeTab==='configuracoes') return renderChecklistTab('config');
+    return '';
+  }
+
+  // --- SEGMENTOS TAB ---------------------------------------------------
+  function renderSegmentosTab(){
+    const cards = state.segments.map(seg=>{
+      const clientCount = state.clients.filter(c=>c.segmentId===seg.id).length;
+      const isEditing = editingSegNameKey === seg.id;
+      const headHtml = isEditing
+        ? `<div class="manager-card-head editing-group">
+            <input type="text" style="flex:1;padding:8px 10px;font-size:14px;font-weight:700;background:rgba(255,255,255,.08);color:var(--ink);border:1.5px solid var(--blue-light);border-radius:var(--radius-sm);" id="editSegNameInput_${seg.id}" value="${escapeHtml(seg.name)}" data-edit-segname-input="${seg.id}">
+            <div class="row-actions" style="opacity:1;">
+              <button class="save-item" data-save-segname="${seg.id}">salvar</button>
+              <button class="cancel-item" data-cancel-segname="${seg.id}">cancelar</button>
+            </div>
+          </div>`
+        : `<div class="manager-card-head">
+            <h3><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${seg.color};margin-right:8px;vertical-align:middle;"></span>${escapeHtml(seg.name)}</h3>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm" data-edit-segname="${seg.id}">renomear</button>
+              <button class="btn btn-sm btn-danger" data-del-segment="${seg.id}">excluir</button>
+            </div>
+          </div>`;
+      return `
+        <div class="manager-card" style="margin-bottom:0;">
+          ${headHtml}
+          <div class="manager-card-meta">${clientCount} cliente(s) neste segmento · ${seg.extraConfig.length} item(ns) de configuração</div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="panel">
+        <div class="section-title"><span class="icon">🏷️</span>Segmentos de negócio</div>
+        <p class="section-sub">Cada segmento representa um tipo de cliente (Material de Construção, Oficina, Mercearia…). Os itens de configuração específicos de cada um são gerenciados na aba <strong>Configurações</strong>.</p>
+
+        <div class="add-group-row">
+          <input type="text" placeholder="Nome do novo segmento (ex: Farmácia, Papelaria…)" id="newSegmentInput">
+          <button class="btn btn-sm btn-primary" id="newSegmentBtn">+ Novo segmento</button>
+        </div>
+
+        ${state.segments.length===0
+          ? `<div class="no-items">Nenhum segmento ainda. Use o campo acima para criar o primeiro.</div>`
+          : `<div class="segment-card-list" style="margin-top:16px;">${cards}</div>`
+        }
+      </div>
+    `;
+  }
+
+  // --- CLIENTES TAB ------------------------------------------------------
+  function renderClientesTab(){
+    const filtered = state.clients.filter(c=>c.name.toLowerCase().includes(sidebarFilter.toLowerCase()));
+    const selected = selectedClientId ? getClient(selectedClientId) : null;
+
+    const grid = `
+      <div class="search-row">
+        <input class="search-input" id="clientSearch" type="text" placeholder="Buscar cliente…" value="${escapeHtml(sidebarFilter)}">
+        <button class="btn btn-primary" id="btnNewClient">+ Novo cliente</button>
+      </div>
+      ${filtered.length===0
+        ? `<div class="no-items">${state.clients.length===0 ? 'Nenhum cliente cadastrado ainda.' : 'Nenhum cliente encontrado.'}</div>`
+        : `<div class="client-grid">
+            ${filtered.map(c=>{
+              const seg = getSegment(c.segmentId);
+              const p = clientProgress(c);
+              return `
+                <div class="client-card-tile ${c.id===selectedClientId?'active':''}" data-client-tile="${c.id}">
+                  <div class="seg-tag"><span class="dot" style="background:${seg?seg.color:'#888'}"></span>${seg?escapeHtml(seg.name):'Sem segmento'}</div>
+                  <h4>${escapeHtml(c.name)}</h4>
+                  <div class="client-progress-row">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:${p.pct}%;"></div></div>
+                    <span>${p.pct}%</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>`
+      }
+    `;
+
+    let detail = '';
+    if(selected){
+      const seg = getSegment(selected.segmentId);
+      const p = clientProgress(selected);
+      const systems = clientTrainingSystems(selected);
+      detail = `
+        <div class="client-detail panel">
+          <div class="client-detail-top">
+            <div>
+              <div class="client-title-eyebrow">${seg ? escapeHtml(seg.name) : 'Sem segmento'}</div>
+              <h2 class="client-title">${escapeHtml(selected.name)}</h2>
+              <div class="client-meta">${selected.info ? escapeHtml(selected.info) : 'Sem observações adicionais'}</div>
+              <div class="client-meta" style="margin-top:6px;">Sistemas: ${systems.length ? systems.map(s=>escapeHtml(s.name)).join(', ') : 'nenhum selecionado'}</div>
+            </div>
+            ${progressStampHtml(p)}
+          </div>
+          <div class="client-actions">
+            <button class="btn btn-sm" id="btnEditClient">Editar cliente</button>
+            <button class="btn btn-sm btn-danger" id="btnDeleteClient">Excluir cliente</button>
+          </div>
+          <div class="jump-links">
+            <button class="btn btn-sm" data-goto-tab="configuracoes">⚙️ Ver configuração (${p.configDone}/${p.configTotal})</button>
+            <button class="btn btn-sm" data-goto-tab="treinamento">🎓 Ver treinamento (${p.trainDone}/${p.trainTotal})</button>
+          </div>
+        </div>
+      `;
+    }
+
+    return `
+      <div class="panel">
+        <div class="section-title"><span class="icon">👥</span>Clientes</div>
+        <p class="section-sub">Todos os clientes que você cadastrou, com o progresso geral de cada um. Toque em um card para ver os detalhes e pular direto para a configuração ou o treinamento.</p>
+        ${grid}
+      </div>
+      ${detail}
+    `;
+  }
+
+  // --- CONFIGURAÇÕES / TREINAMENTO (shared shape) ------------------------
+  function renderChecklistTab(mode){
+    const isConfig = mode==='config';
+    const client = selectedClientId ? getClient(selectedClientId) : null;
+
+    const picker = `
+      <div class="client-picker">
+        <label>Cliente ativo</label>
+        <select id="activeClientSelect">
+          <option value="">— nenhum (só gerenciando a estrutura) —</option>
+          ${state.clients.map(c=>`<option value="${c.id}" ${c.id===selectedClientId?'selected':''}>${escapeHtml(c.name)}</option>`).join('')}
+        </select>
+      </div>
+    `;
+
+    const structurePanel = isConfig ? renderConfigStructurePanel() : renderTrainingStructurePanel();
+
+    let checklistPanel;
+    if(state.clients.length===0){
+      checklistPanel = `
+        <div class="placeholder">
+          <h2>Nenhum cliente cadastrado</h2>
+          <p>Você já pode montar toda a estrutura de ${isConfig?'configuração':'treinamento'} ao lado — quando cadastrar um cliente na aba Clientes, é só selecioná-lo aqui para marcar o que já foi feito.</p>
+          <button class="btn btn-primary" data-goto-tab="clientes">Ir para Clientes</button>
+        </div>
+      `;
+    } else if(!client){
+      checklistPanel = `
+        <div class="placeholder">
+          <h2>Nenhum cliente selecionado</h2>
+          <p>Escolha um cliente acima para ver e marcar ${isConfig?'a configuração':'o treinamento'} dele. Sem selecionar, você ainda pode editar a estrutura ao lado normalmente.</p>
+        </div>
+      `;
+    } else {
+      checklistPanel = isConfig ? renderConfigChecklistPanel(client) : renderTrainingChecklistPanel(client);
+    }
+
+    return `
+      ${picker}
+      <div class="two-col">
+        ${checklistPanel}
+        ${structurePanel}
+      </div>
+    `;
+  }
+
+  function renderConfigChecklistPanel(client){
+    const { standard, extra } = clientConfigItems(client);
+    const seg = getSegment(client.segmentId);
+    const p = clientProgress(client);
+    return `
+      <div class="panel">
+        <div class="col-header config">⚙️ Configuração — ${escapeHtml(client.name)}<span class="badge">${p.configDone}/${p.configTotal}</span></div>
+        <div class="group-head"><h4>Padrão (todas as empresas)</h4><div class="rule"></div></div>
+        ${checklistRows(client, standard, client.checklistConfig, 'config')}
+        <div class="group-head"><h4>${seg?escapeHtml(seg.name):'Segmento não encontrado'}</h4><div class="rule"></div></div>
+        ${checklistRows(client, extra, client.checklistConfig, 'config')}
+      </div>
+    `;
+  }
+
+  function renderTrainingChecklistPanel(client){
+    const systems = clientTrainingSystems(client);
+    const p = clientProgress(client);
+    return `
+      <div class="panel">
+        <div class="col-header train">🎓 Treinamento — ${escapeHtml(client.name)}<span class="badge">${p.trainDone}/${p.trainTotal}</span></div>
+        ${systems.length===0
+          ? `<div class="empty-training-hint">Nenhum sistema selecionado para este cliente.<br>Edite o cliente (na aba Clientes) para escolher quais sistemas ele usa.</div>`
+          : systems.map(sys=>`
+              <div class="group-head"><h4>${escapeHtml(sys.name)}</h4><div class="rule"></div></div>
+              ${checklistRows(client, sys.topics, client.checklistTraining, 'training')}
+            `).join('')
+        }
+      </div>
+    `;
+  }
+
+  function renderConfigStructurePanel(){
+    const segmentCards = state.segments.map(seg=>`
+      <div class="manager-card">
+        <div class="manager-card-head"><h3><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${seg.color};margin-right:7px;vertical-align:middle;"></span>${escapeHtml(seg.name)}</h3></div>
+        ${seg.extraConfig.length ? seg.extraConfig.map(it=>managerItemRow('seg', seg.id, it)).join('') : `<div class="no-items">Nenhum item ainda.</div>`}
+        <div class="add-item-row">
+          <input type="text" placeholder="Novo item para ${escapeHtml(seg.name)}…" data-new-seg-item-input="${seg.id}">
+          <button class="btn btn-sm" data-new-seg-item-btn="${seg.id}">Adicionar</button>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="panel">
+        <div class="section-title" style="font-size:14px;"><span class="icon">🧩</span>Estrutura da configuração</div>
+        <p class="section-sub">Itens padrão valem para qualquer cliente. Itens por segmento valem só para clientes daquele tipo. Clique em "X subtítulo(s)" para detalhar uma tela em passos individuais.</p>
+        <div class="manager-card standard">
+          <div class="manager-card-head"><h3>Padrão — todas as empresas</h3></div>
+          ${state.standardConfig.length ? state.standardConfig.map(it=>managerItemRow('std', null, it)).join('') : `<div class="no-items">Nenhum item ainda.</div>`}
+          <div class="add-item-row">
+            <input type="text" placeholder="Novo item padrão…" id="newStdItemInput">
+            <button class="btn btn-sm" id="newStdItemBtn">Adicionar</button>
+          </div>
+        </div>
+        ${segmentCards || `<div class="no-items">Crie segmentos na aba Segmentos para adicionar itens específicos.</div>`}
+      </div>
+    `;
+  }
+
+  function renderTrainingStructurePanel(){
+    const systemCards = state.systems.map(sys=>`
+      <div class="manager-card">
+        <div class="manager-card-head">
+          <h3>${escapeHtml(sys.name)}</h3>
+          <div style="display:flex;gap:6px;">
+            <button class="btn btn-sm" data-edit-sysname="${sys.id}">renomear</button>
+            <button class="btn btn-sm btn-danger" data-del-system="${sys.id}">excluir</button>
+          </div>
+        </div>
+        ${sys.topics.length ? sys.topics.map(it=>managerItemRow('topic', sys.id, it)).join('') : `<div class="no-items">Nenhum tópico ainda.</div>`}
+        <div class="add-item-row">
+          <input type="text" placeholder="Novo tópico em ${escapeHtml(sys.name)}…" data-new-topic-input="${sys.id}">
+          <button class="btn btn-sm" data-new-topic-btn="${sys.id}">Adicionar</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Renaming a system uses inline edit like segments — render name editor inline when active
+    const systemCardsFinal = state.systems.map(sys=>{
+      if(editingSystemNameKey===sys.id){
+        return `
+          <div class="manager-card">
+            <div class="manager-card-head editing-group">
+              <input type="text" style="flex:1;padding:8px 10px;font-size:14px;font-weight:700;background:rgba(255,255,255,.08);color:var(--ink);border:1.5px solid var(--blue-light);border-radius:var(--radius-sm);" id="editSysNameInput_${sys.id}" value="${escapeHtml(sys.name)}" data-edit-sysname-input="${sys.id}">
+              <div class="row-actions" style="opacity:1;">
+                <button class="save-item" data-save-sysname="${sys.id}">salvar</button>
+                <button class="cancel-item" data-cancel-sysname="${sys.id}">cancelar</button>
+              </div>
+            </div>
+            ${sys.topics.length ? sys.topics.map(it=>managerItemRow('topic', sys.id, it)).join('') : `<div class="no-items">Nenhum tópico ainda.</div>`}
+            <div class="add-item-row">
+              <input type="text" placeholder="Novo tópico em ${escapeHtml(sys.name)}…" data-new-topic-input="${sys.id}">
+              <button class="btn btn-sm" data-new-topic-btn="${sys.id}">Adicionar</button>
+            </div>
+          </div>
+        `;
+      }
+      return `
+        <div class="manager-card">
+          <div class="manager-card-head">
+            <h3>${escapeHtml(sys.name)}</h3>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-sm" data-edit-sysname="${sys.id}">renomear</button>
+              <button class="btn btn-sm btn-danger" data-del-system="${sys.id}">excluir</button>
+            </div>
+          </div>
+          ${sys.topics.length ? sys.topics.map(it=>managerItemRow('topic', sys.id, it)).join('') : `<div class="no-items">Nenhum tópico ainda.</div>`}
+          <div class="add-item-row">
+            <input type="text" placeholder="Novo tópico em ${escapeHtml(sys.name)}…" data-new-topic-input="${sys.id}">
+            <button class="btn btn-sm" data-new-topic-btn="${sys.id}">Adicionar</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="panel">
+        <div class="section-title" style="font-size:14px;"><span class="icon">🧩</span>Estrutura do treinamento</div>
+        <p class="section-sub">Cada sistema (ex: Integra) tem tópicos (telas). Clique em "X subtítulo(s)" dentro de um tópico para detalhar exatamente o que foi passado naquela tela.</p>
+        <div class="add-group-row">
+          <input type="text" placeholder="Nome do sistema (ex: Integra, TOTVS, Bling…)" id="newSystemInput">
+          <button class="btn btn-sm btn-primary" id="newSystemBtn">+ Novo sistema</button>
+        </div>
+        ${state.systems.length===0 ? `<div class="no-items">Nenhum sistema ainda. Use o campo acima para criar o primeiro.</div>` : systemCardsFinal}
+      </div>
+    `;
+  }
+
+  // ---------------------------------------------------------------------
+  // MODALS
+  // ---------------------------------------------------------------------
+
+  function renderModal(){
+    let html = '';
+
+    if(modal.type==='newClient' || modal.type==='editClient'){
+      const client = modal.payload && modal.payload.clientId ? getClient(modal.payload.clientId) : null;
+      const selectedSystems = new Set(client ? (client.systemIds||[]) : []);
+      html = `
+        <div class="modal">
+          <h3>${client ? 'Editar cliente' : 'Novo cliente'}</h3>
+          <p class="hint">Todo cliente já recebe a configuração padrão automaticamente. Escolha o segmento para somar os itens específicos dele.</p>
+          <div class="field">
+            <label>Nome do cliente</label>
+            <input type="text" id="modalClientName" value="${client?escapeHtml(client.name):''}" placeholder="Nome da empresa ou cliente">
+          </div>
+          <div class="field">
+            <label>Configuração padrão <span style="text-transform:none;font-weight:400;color:var(--ink-faint);">(aplicada a todos, automaticamente)</span></label>
+            <div class="checkbox-list" style="max-height:130px;">
+              ${state.standardConfig.length===0
+                ? `<div class="empty">Nenhum item padrão cadastrado ainda — crie em Configurações.</div>`
+                : state.standardConfig.map(it=>`<div class="empty" style="font-style:normal;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.07);">✓ ${escapeHtml(it.texto)}</div>`).join('')
+              }
+            </div>
+          </div>
+          <div class="field">
+            <label>Segmento</label>
+            <select id="modalClientSegment">
+              ${state.segments.map(s=>`<option value="${s.id}" ${client && client.segmentId===s.id?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Sistemas (treinamento)</label>
+            <div class="checkbox-list">
+              ${state.systems.length===0
+                ? `<div class="empty">Nenhum sistema cadastrado ainda — crie um na aba Treinamento.</div>`
+                : state.systems.map(s=>`
+                    <label>
+                      <input type="checkbox" value="${s.id}" ${selectedSystems.has(s.id)?'checked':''} data-modal-system-checkbox>
+                      ${escapeHtml(s.name)}
+                    </label>
+                  `).join('')
+              }
+            </div>
+          </div>
+          <div class="field">
+            <label>Observações (opcional)</label>
+            <input type="text" id="modalClientInfo" value="${client?escapeHtml(client.info||''):''}" placeholder="Telefone, endereço, versão do sistema…">
+          </div>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel">Cancelar</button>
+            <button class="btn btn-primary" id="modalSaveClient">Salvar</button>
+          </div>
+        </div>
+      `;
+    } else if(modal.type==='confirmDeleteSegment'){
+      const seg = getSegment(modal.payload.segId);
+      const count = state.clients.filter(c=>c.segmentId===seg.id).length;
+      html = `
+        <div class="modal">
+          <h3>Excluir "${escapeHtml(seg.name)}"?</h3>
+          <p class="hint">${count>0 ? `Isso também excluirá ${count} cliente(s) cadastrado(s) neste segmento, junto com todo o progresso deles. ` : ''}Esta ação não pode ser desfeita.</p>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel">Cancelar</button>
+            <button class="btn btn-danger" id="modalConfirmDeleteSegment">Excluir</button>
+          </div>
+        </div>
+      `;
+    } else if(modal.type==='confirmDeleteSystem'){
+      const sys = getSystem(modal.payload.sysId);
+      const count = state.clients.filter(c=>(c.systemIds||[]).includes(sys.id)).length;
+      html = `
+        <div class="modal">
+          <h3>Excluir sistema "${escapeHtml(sys.name)}"?</h3>
+          <p class="hint">${count>0 ? `${count} cliente(s) têm este sistema marcado — o progresso de treinamento nele será perdido para eles. ` : ''}Esta ação não pode ser desfeita.</p>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel">Cancelar</button>
+            <button class="btn btn-danger" id="modalConfirmDeleteSystem">Excluir</button>
+          </div>
+        </div>
+      `;
+    } else if(modal.type==='confirmDeleteClient'){
+      const client = getClient(modal.payload.clientId);
+      html = `
+        <div class="modal">
+          <h3>Excluir "${escapeHtml(client.name)}"?</h3>
+          <p class="hint">Todo o progresso de configuração e treinamento deste cliente será perdido. Esta ação não pode ser desfeita.</p>
+          <div class="modal-actions">
+            <button class="btn" id="modalCancel">Cancelar</button>
+            <button class="btn btn-danger" id="modalConfirmDeleteClient">Excluir</button>
+          </div>
+        </div>
+      `;
+    }
+
+    let overlay = document.getElementById('modalOverlay');
+    if(!overlay){
+      overlay = document.createElement('div');
+      overlay.id = 'modalOverlay';
+      overlay.className = 'modal-overlay';
+      document.body.appendChild(overlay);
+    }
+    overlay.innerHTML = html;
+    overlay.style.display = 'flex';
+
+    overlay.querySelector('#modalCancel') && overlay.querySelector('#modalCancel').addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+    if(modal.type==='newClient' || modal.type==='editClient'){
+      if(state.segments.length===0){
+        showToast('Crie um segmento antes de cadastrar um cliente.');
+        closeModal();
+        return;
+      }
+      overlay.querySelector('#modalSaveClient').addEventListener('click', async ()=>{
+        const name = overlay.querySelector('#modalClientName').value.trim();
+        const segmentId = overlay.querySelector('#modalClientSegment').value;
+        const info = overlay.querySelector('#modalClientInfo').value.trim();
+        const systemIds = Array.from(overlay.querySelectorAll('[data-modal-system-checkbox]:checked')).map(cb=>cb.value);
+        if(!name){ showToast('Digite o nome do cliente.'); return; }
+        if(modal.payload && modal.payload.clientId){
+          const c = getClient(modal.payload.clientId);
+          c.name = name; c.segmentId = segmentId; c.info = info; c.systemIds = systemIds;
+        } else {
+          const newClient = {id: uid('cli'), name, segmentId, info, systemIds, checklistConfig:{}, checklistTraining:{}};
+          state.clients.push(newClient);
+          selectedClientId = newClient.id;
+        }
+        await persist();
+        closeModal();
+        render();
+      });
+    }
+
+    if(modal.type==='confirmDeleteSegment'){
+      overlay.querySelector('#modalConfirmDeleteSegment').addEventListener('click', async ()=>{
+        const segId = modal.payload.segId;
+        state.clients = state.clients.filter(c=>c.segmentId!==segId);
+        state.segments = state.segments.filter(s=>s.id!==segId);
+        if(selectedClientId && !getClient(selectedClientId)) selectedClientId = null;
+        await persist();
+        closeModal();
+        render();
+      });
+    }
+
+    if(modal.type==='confirmDeleteSystem'){
+      overlay.querySelector('#modalConfirmDeleteSystem').addEventListener('click', async ()=>{
+        const sysId = modal.payload.sysId;
+        state.systems = state.systems.filter(s=>s.id!==sysId);
+        state.clients.forEach(c=>{ c.systemIds = (c.systemIds||[]).filter(id=>id!==sysId); });
+        await persist();
+        closeModal();
+        render();
+      });
+    }
+
+    if(modal.type==='confirmDeleteClient'){
+      overlay.querySelector('#modalConfirmDeleteClient').addEventListener('click', async ()=>{
+        state.clients = state.clients.filter(c=>c.id!==modal.payload.clientId);
+        if(selectedClientId===modal.payload.clientId) selectedClientId = null;
+        await persist();
+        closeModal();
+        render();
+      });
+    }
+  }
+
+  function closeModal(){
+    modal = null;
+    const overlay = document.getElementById('modalOverlay');
+    if(overlay) overlay.style.display = 'none';
+  }
+
+  // ---------------------------------------------------------------------
+  // EVENTS
+  // ---------------------------------------------------------------------
+
+  function attachEvents(){
+    document.querySelectorAll('[data-tab]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ activeTab = btn.getAttribute('data-tab'); render(); });
+    });
+    document.querySelectorAll('[data-goto-tab]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ activeTab = btn.getAttribute('data-goto-tab'); render(); });
+    });
+
+    const btnDownloadBackup = document.getElementById('btnDownloadBackup');
+    if(btnDownloadBackup) btnDownloadBackup.addEventListener('click', downloadBackup);
+    const btnImportBackup = document.getElementById('btnImportBackup');
+    if(btnImportBackup) btnImportBackup.addEventListener('click', triggerImportBackup);
+
+    const clientSearch = document.getElementById('clientSearch');
+    if(clientSearch){
+      clientSearch.addEventListener('input', (e)=>{
+        sidebarFilter = e.target.value;
+        render();
+        const el = document.getElementById('clientSearch');
+        if(el){ el.focus(); el.selectionStart = el.selectionEnd = el.value.length; }
+      });
+    }
+    document.querySelectorAll('[data-client-tile]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        selectedClientId = el.getAttribute('data-client-tile');
+        render();
+      });
+    });
+
+    const activeClientSelect = document.getElementById('activeClientSelect');
+    if(activeClientSelect){
+      activeClientSelect.addEventListener('change', (e)=>{
+        selectedClientId = e.target.value || null;
+        render();
+      });
+    }
+
+    const btnNewClient = document.getElementById('btnNewClient');
+    if(btnNewClient) btnNewClient.addEventListener('click', ()=>{
+      if(state.segments.length===0){ showToast('Crie um segmento antes de cadastrar um cliente.'); return; }
+      modal={type:'newClient'}; renderModal();
+    });
+    const btnEditClient = document.getElementById('btnEditClient');
+    if(btnEditClient) btnEditClient.addEventListener('click', ()=>{ modal={type:'editClient', payload:{clientId:selectedClientId}}; renderModal(); });
+    const btnDeleteClient = document.getElementById('btnDeleteClient');
+    if(btnDeleteClient) btnDeleteClient.addEventListener('click', ()=>{ modal={type:'confirmDeleteClient', payload:{clientId:selectedClientId}}; renderModal(); });
+
+    // --- Client checklist checkboxes ---
+    document.querySelectorAll('[data-check-item]').forEach(cb=>{
+      cb.addEventListener('change', async (e)=>{
+        const client = getClient(selectedClientId);
+        const itemId = e.target.getAttribute('data-check-item');
+        const target = e.target.getAttribute('data-check-target');
+        const map = target==='config' ? client.checklistConfig : client.checklistTraining;
+        map[itemId] = e.target.checked;
+        await persist();
+        render();
+      });
+    });
+
+    // --- Expand/collapse a client-facing item with subtítulos ---
+    document.querySelectorAll('[data-toggle-tab]').forEach(row=>{
+      row.addEventListener('click', ()=>{
+        const itemId = row.getAttribute('data-toggle-tab');
+        const key = selectedClientId + '|' + itemId;
+        if(expandedItems.has(key)) expandedItems.delete(key); else expandedItems.add(key);
+        render();
+      });
+    });
+
+    // --- Subtítulos (manager: expand/edit/add/remove) ---
+    document.querySelectorAll('[data-toggle-manager-item]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const itemId = el.getAttribute('data-toggle-manager-item');
+        if(expandedManagerItems.has(itemId)) expandedManagerItems.delete(itemId); else expandedManagerItems.add(itemId);
+        render();
+      });
+    });
+    document.querySelectorAll('[data-edit-subitem]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSubItemKey = btn.getAttribute('data-edit-subitem'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-subitem]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSubItemKey = null; render(); });
+    });
+    document.querySelectorAll('[data-del-subitem]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const [itemId, subId] = btn.getAttribute('data-del-subitem').split('|');
+        const item = locateItem(itemId);
+        if(item){ item.subItems = (item.subItems||[]).filter(si=>si.id!==subId); }
+        await persist();
+        render();
+      });
+    });
+    async function saveSubItem(key){
+      const [itemId, subId] = key.split('|');
+      const input = document.querySelector(`[data-edit-subitem-input="${key}"]`);
+      const texto = input.value.trim();
+      if(!texto){ showToast('O texto não pode ficar vazio.'); return; }
+      const item = locateItem(itemId);
+      const si = item && (item.subItems||[]).find(s=>s.id===subId);
+      if(si) si.texto = texto;
+      editingSubItemKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-subitem]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveSubItem(btn.getAttribute('data-save-subitem')));
+    });
+    document.querySelectorAll('[data-edit-subitem-input]').forEach(input=>{
+      const key = input.getAttribute('data-edit-subitem-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveSubItem(key); }
+        if(e.key==='Escape'){ e.preventDefault(); editingSubItemKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    document.querySelectorAll('[data-new-subitem-btn]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const itemId = btn.getAttribute('data-new-subitem-btn');
+        const input = document.querySelector(`[data-new-subitem-input="${itemId}"]`);
+        const texto = input.value.trim();
+        if(!texto){ showToast('Digite o texto do subtítulo.'); return; }
+        const item = locateItem(itemId);
+        if(item){ if(!item.subItems) item.subItems = []; item.subItems.push({id: uid('sub'), texto}); }
+        await persist();
+        render();
+      });
+    });
+    document.querySelectorAll('[data-new-subitem-input]').forEach(input=>{
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){
+          const itemId = input.getAttribute('data-new-subitem-input');
+          document.querySelector(`[data-new-subitem-btn="${itemId}"]`).click();
+        }
+      });
+    });
+
+    // --- Standard config items ---
+    document.querySelectorAll('[data-edit-std-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingStdItemKey = btn.getAttribute('data-edit-std-item'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-std-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingStdItemKey = null; render(); });
+    });
+    document.querySelectorAll('[data-del-std-item]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const itemId = btn.getAttribute('data-del-std-item');
+        state.standardConfig = state.standardConfig.filter(i=>i.id!==itemId);
+        await persist();
+        render();
+      });
+    });
+    async function saveStdItem(itemId){
+      const input = document.querySelector(`[data-edit-std-input="${itemId}"]`);
+      const texto = input.value.trim();
+      if(!texto){ showToast('O texto não pode ficar vazio.'); return; }
+      const item = state.standardConfig.find(i=>i.id===itemId);
+      item.texto = texto;
+      editingStdItemKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-std-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveStdItem(btn.getAttribute('data-save-std-item')));
+    });
+    document.querySelectorAll('[data-edit-std-input]').forEach(input=>{
+      const itemId = input.getAttribute('data-edit-std-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveStdItem(itemId); }
+        if(e.key==='Escape'){ e.preventDefault(); editingStdItemKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    const newStdBtn = document.getElementById('newStdItemBtn');
+    if(newStdBtn) newStdBtn.addEventListener('click', async ()=>{
+      const input = document.getElementById('newStdItemInput');
+      const texto = input.value.trim();
+      if(!texto){ showToast('Digite o texto do item.'); return; }
+      state.standardConfig.push({id: uid('cfg'), texto, subItems:[]});
+      await persist();
+      render();
+    });
+    const newStdInput = document.getElementById('newStdItemInput');
+    if(newStdInput) newStdInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter') document.getElementById('newStdItemBtn').click();
+    });
+
+    // --- Segment-specific config items ---
+    document.querySelectorAll('[data-edit-seg-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSegItemKey = btn.getAttribute('data-edit-seg-item'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-seg-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSegItemKey = null; render(); });
+    });
+    document.querySelectorAll('[data-del-seg-item]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const [segId, itemId] = btn.getAttribute('data-del-seg-item').split('|');
+        const seg = getSegment(segId);
+        seg.extraConfig = seg.extraConfig.filter(i=>i.id!==itemId);
+        await persist();
+        render();
+      });
+    });
+    async function saveSegItem(key){
+      const [segId, itemId] = key.split('|');
+      const input = document.querySelector(`[data-edit-seg-input="${key}"]`);
+      const texto = input.value.trim();
+      if(!texto){ showToast('O texto não pode ficar vazio.'); return; }
+      const seg = getSegment(segId);
+      const item = seg.extraConfig.find(i=>i.id===itemId);
+      item.texto = texto;
+      editingSegItemKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-seg-item]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveSegItem(btn.getAttribute('data-save-seg-item')));
+    });
+    document.querySelectorAll('[data-edit-seg-input]').forEach(input=>{
+      const key = input.getAttribute('data-edit-seg-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveSegItem(key); }
+        if(e.key==='Escape'){ e.preventDefault(); editingSegItemKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    document.querySelectorAll('[data-new-seg-item-btn]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const segId = btn.getAttribute('data-new-seg-item-btn');
+        const input = document.querySelector(`[data-new-seg-item-input="${segId}"]`);
+        const texto = input.value.trim();
+        if(!texto){ showToast('Digite o texto do item.'); return; }
+        const seg = getSegment(segId);
+        seg.extraConfig.push({id: uid('cfg'), texto, subItems:[]});
+        await persist();
+        render();
+      });
+    });
+    document.querySelectorAll('[data-new-seg-item-input]').forEach(input=>{
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){
+          const segId = input.getAttribute('data-new-seg-item-input');
+          document.querySelector(`[data-new-seg-item-btn="${segId}"]`).click();
+        }
+      });
+    });
+
+    // --- Segment name / delete ---
+    document.querySelectorAll('[data-edit-segname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSegNameKey = btn.getAttribute('data-edit-segname'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-segname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSegNameKey = null; render(); });
+    });
+    async function saveSegName(segId){
+      const input = document.querySelector(`[data-edit-segname-input="${segId}"]`);
+      const name = input.value.trim();
+      if(!name){ showToast('O nome do segmento não pode ficar vazio.'); return; }
+      getSegment(segId).name = name;
+      editingSegNameKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-segname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveSegName(btn.getAttribute('data-save-segname')));
+    });
+    document.querySelectorAll('[data-edit-segname-input]').forEach(input=>{
+      const segId = input.getAttribute('data-edit-segname-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveSegName(segId); }
+        if(e.key==='Escape'){ e.preventDefault(); editingSegNameKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    document.querySelectorAll('[data-del-segment]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ modal={type:'confirmDeleteSegment', payload:{segId:btn.getAttribute('data-del-segment')}}; renderModal(); });
+    });
+    const newSegmentBtn = document.getElementById('newSegmentBtn');
+    if(newSegmentBtn) newSegmentBtn.addEventListener('click', async ()=>{
+      const input = document.getElementById('newSegmentInput');
+      const name = input.value.trim();
+      if(!name){ showToast('Digite o nome do segmento.'); return; }
+      const color = CLIENT_COLORS[state.segments.length % CLIENT_COLORS.length];
+      state.segments.push({id: uid('seg'), name, color, extraConfig: []});
+      await persist();
+      render();
+    });
+    const newSegmentInput = document.getElementById('newSegmentInput');
+    if(newSegmentInput) newSegmentInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter') document.getElementById('newSegmentBtn').click();
+    });
+
+    // --- Training topics ---
+    document.querySelectorAll('[data-edit-topic]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingTopicKey = btn.getAttribute('data-edit-topic'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-topic]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingTopicKey = null; render(); });
+    });
+    document.querySelectorAll('[data-del-topic]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const [sysId, topicId] = btn.getAttribute('data-del-topic').split('|');
+        const sys = getSystem(sysId);
+        sys.topics = sys.topics.filter(i=>i.id!==topicId);
+        await persist();
+        render();
+      });
+    });
+    async function saveTopic(key){
+      const [sysId, topicId] = key.split('|');
+      const input = document.querySelector(`[data-edit-topic-input="${key}"]`);
+      const texto = input.value.trim();
+      if(!texto){ showToast('O texto não pode ficar vazio.'); return; }
+      const sys = getSystem(sysId);
+      const item = sys.topics.find(i=>i.id===topicId);
+      item.texto = texto;
+      editingTopicKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-topic]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveTopic(btn.getAttribute('data-save-topic')));
+    });
+    document.querySelectorAll('[data-edit-topic-input]').forEach(input=>{
+      const key = input.getAttribute('data-edit-topic-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveTopic(key); }
+        if(e.key==='Escape'){ e.preventDefault(); editingTopicKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    document.querySelectorAll('[data-new-topic-btn]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const sysId = btn.getAttribute('data-new-topic-btn');
+        const input = document.querySelector(`[data-new-topic-input="${sysId}"]`);
+        const texto = input.value.trim();
+        if(!texto){ showToast('Digite o texto do tópico.'); return; }
+        const sys = getSystem(sysId);
+        sys.topics.push({id: uid('top'), texto, subItems:[]});
+        await persist();
+        render();
+      });
+    });
+    document.querySelectorAll('[data-new-topic-input]').forEach(input=>{
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){
+          const sysId = input.getAttribute('data-new-topic-input');
+          document.querySelector(`[data-new-topic-btn="${sysId}"]`).click();
+        }
+      });
+    });
+
+    // --- System name / delete ---
+    document.querySelectorAll('[data-edit-sysname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSystemNameKey = btn.getAttribute('data-edit-sysname'); render(); });
+    });
+    document.querySelectorAll('[data-cancel-sysname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ editingSystemNameKey = null; render(); });
+    });
+    async function saveSysName(sysId){
+      const input = document.querySelector(`[data-edit-sysname-input="${sysId}"]`);
+      const name = input.value.trim();
+      if(!name){ showToast('O nome do sistema não pode ficar vazio.'); return; }
+      getSystem(sysId).name = name;
+      editingSystemNameKey = null;
+      await persist();
+      render();
+    }
+    document.querySelectorAll('[data-save-sysname]').forEach(btn=>{
+      btn.addEventListener('click', ()=>saveSysName(btn.getAttribute('data-save-sysname')));
+    });
+    document.querySelectorAll('[data-edit-sysname-input]').forEach(input=>{
+      const sysId = input.getAttribute('data-edit-sysname-input');
+      input.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter'){ e.preventDefault(); saveSysName(sysId); }
+        if(e.key==='Escape'){ e.preventDefault(); editingSystemNameKey=null; render(); }
+      });
+      input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
+    });
+    document.querySelectorAll('[data-del-system]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ modal={type:'confirmDeleteSystem', payload:{sysId:btn.getAttribute('data-del-system')}}; renderModal(); });
+    });
+    const newSystemBtn = document.getElementById('newSystemBtn');
+    if(newSystemBtn) newSystemBtn.addEventListener('click', async ()=>{
+      const input = document.getElementById('newSystemInput');
+      const name = input.value.trim();
+      if(!name){ showToast('Digite o nome do sistema.'); return; }
+      state.systems.push({id: uid('sys'), name, topics: []});
+      await persist();
+      render();
+    });
+    const newSystemInput = document.getElementById('newSystemInput');
+    if(newSystemInput) newSystemInput.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter') document.getElementById('newSystemBtn').click();
+    });
+  }
+
+  loadData();
+})();
+</script>
+</body>
+</html>
