@@ -510,6 +510,7 @@
 
   let sb = null;
   let applyingRemoteUpdate = false;
+  let stateVersion = null; // updated_at da versão que esta aba tem carregada
 
   function initSupabase(){
     try{
@@ -530,6 +531,7 @@
         if(applyingRemoteUpdate) return;
         if(payload.new && payload.new.data){
           state = migrateToCurrentShape(payload.new.data);
+          stateVersion = payload.new.updated_at;
           render();
         }
       })
@@ -546,12 +548,14 @@
       return;
     }
     try{
-      const { data, error } = await sb.from('checklist_state').select('data').eq('id','default').maybeSingle();
+      const { data, error } = await sb.from('checklist_state').select('data, updated_at').eq('id','default').maybeSingle();
       if(error) throw error;
       if(data && data.data && Object.keys(data.data).length){
         state = migrateToCurrentShape(data.data);
+        stateVersion = data.updated_at;
       } else {
         state = freshDefaultState();
+        stateVersion = data ? data.updated_at : null;
         await persist();
       }
     }catch(e){
@@ -698,10 +702,26 @@
     render();
     applyingRemoteUpdate = true;
     try{
-      const { error } = await sb.from('checklist_state')
-        .update({ data: state, updated_at: new Date().toISOString() })
-        .eq('id','default');
+      const nowIso = new Date().toISOString();
+      let query = sb.from('checklist_state').update({ data: state, updated_at: nowIso }).eq('id','default');
+      // Só grava se ninguém salvou uma versão mais nova desde que esta aba carregou —
+      // evita que uma aba com dado desatualizado apague a mudança de outra pessoa.
+      if(stateVersion){ query = query.eq('updated_at', stateVersion); }
+      const { data: updatedRows, error } = await query.select('data, updated_at');
       if(error) throw error;
+      if(!updatedRows || updatedRows.length === 0){
+        const { data: fresh, error: fetchErr } = await sb.from('checklist_state').select('data, updated_at').eq('id','default').maybeSingle();
+        if(fetchErr) throw fetchErr;
+        if(fresh){
+          state = migrateToCurrentShape(fresh.data);
+          stateVersion = fresh.updated_at;
+        }
+        saveStatus = { state:'error', message:'Alguém salvou uma mudança ao mesmo tempo. Atualizei a tela com os dados mais recentes — repita sua última ação.', time:new Date() };
+        render();
+        applyingRemoteUpdate = false;
+        return;
+      }
+      stateVersion = updatedRows[0].updated_at;
       saveStatus = { state:'ok', message:'', time:new Date() };
     }catch(e){
       console.error('Erro ao salvar', e);
