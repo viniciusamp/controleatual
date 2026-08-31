@@ -290,6 +290,7 @@
     display:grid;grid-template-columns:1fr 1fr;column-gap:20px;row-gap:0;
   }
   .tab-body .check-row{padding:6px 4px;border-bottom:none;}
+  .tab-body .check-item{grid-column:1 / -1;}
   .tab-body .check-row label{font-size:13px;}
 
   .group-head{display:flex;align-items:center;gap:8px;margin:16px 0 8px;}
@@ -567,7 +568,7 @@
     subscribeRealtime();
   }
 
-  function withSubItems(list){ return (list||[]).map(it=>({ ...it, subItems: it.subItems||[] })); }
+  function withSubItems(list){ return (list||[]).map(it=>({ ...it, subItems: withSubItems(it.subItems) })); }
 
   function migrateToCurrentShape(raw){
     if(raw && Array.isArray(raw.standardConfig) && Array.isArray(raw.systems)){
@@ -893,21 +894,47 @@
   function getClient(id){ return state.clients.find(c=>c.id===id); }
 
   function leafItems(items){
-    return items.flatMap(it => (it.subItems && it.subItems.length) ? it.subItems : [it]);
+    return items.flatMap(it => (it.subItems && it.subItems.length) ? leafItems(it.subItems) : [it]);
+  }
+
+  function findInTree(items, itemId){
+    for(const it of items){
+      if(it.id === itemId) return it;
+      if(it.subItems && it.subItems.length){
+        const found = findInTree(it.subItems, itemId);
+        if(found) return found;
+      }
+    }
+    return null;
   }
 
   function locateItem(itemId){
-    let found = state.standardConfig.find(i=>i.id===itemId);
+    let found = findInTree(state.standardConfig, itemId);
     if(found) return found;
     for(const seg of state.segments){
-      found = seg.extraConfig.find(i=>i.id===itemId);
+      found = findInTree(seg.extraConfig, itemId);
       if(found) return found;
     }
     for(const sys of state.systems){
-      found = sys.topics.find(i=>i.id===itemId);
+      found = findInTree(sys.topics, itemId);
       if(found) return found;
     }
     return null;
+  }
+
+  function removeFromTree(items, itemId){
+    const idx = items.findIndex(i=>i.id===itemId);
+    if(idx>=0){ items.splice(idx,1); return true; }
+    for(const it of items){
+      if(it.subItems && it.subItems.length && removeFromTree(it.subItems, itemId)) return true;
+    }
+    return false;
+  }
+
+  function removeItemEverywhere(itemId){
+    if(removeFromTree(state.standardConfig, itemId)) return;
+    for(const seg of state.segments){ if(removeFromTree(seg.extraConfig, itemId)) return; }
+    for(const sys of state.systems){ if(removeFromTree(sys.topics, itemId)) return; }
   }
 
   function clientConfigItems(client){
@@ -944,23 +971,25 @@
   // SHARED: manager-style item row with expandable subtítulos editor
   // ---------------------------------------------------------------------
 
-  function renderManagerSubItemRow(itemId, si){
-    const key = itemId + '|' + si.id;
-    if(editingSubItemKey === key){
+  function renderManagerSubItemRow(node){
+    if(editingSubItemKey === node.id){
       return `<div class="check-row editing">
-        <input type="text" id="editSubItemInput_${si.id}" value="${escapeHtml(si.texto)}" data-edit-subitem-input="${key}">
+        <input type="text" id="editSubItemInput_${node.id}" value="${escapeHtml(node.texto)}" data-edit-subitem-input="${node.id}">
         <div class="row-actions" style="opacity:1;">
-          <button class="save-item" data-save-subitem="${key}">salvar</button>
-          <button class="cancel-item" data-cancel-subitem="${key}">cancelar</button>
+          <button class="save-item" data-save-subitem="${node.id}">salvar</button>
+          <button class="cancel-item" data-cancel-subitem="${node.id}">cancelar</button>
         </div>
       </div>`;
     }
-    return `<div class="check-row">
-      <label style="flex:1;">${escapeHtml(si.texto)}</label>
-      <div class="row-actions">
-        <button class="edit-item" data-edit-subitem="${key}">editar</button>
-        <button class="del-item" data-del-subitem="${key}">remover</button>
+    return `<div class="manager-item">
+      <div class="check-row">
+        <label style="flex:1;">${escapeHtml(node.texto)}</label>
+        <div class="row-actions">
+          <button class="edit-item" data-edit-subitem="${node.id}">editar</button>
+          <button class="del-item" data-del-subitem="${node.id}">remover</button>
+        </div>
       </div>
+      ${renderSubItemsBlock(node)}
     </div>`;
   }
 
@@ -973,7 +1002,7 @@
       </div>
       ${isOpen ? `
         <div class="manager-subitems">
-          ${subItems.length ? subItems.map(si=>renderManagerSubItemRow(it.id, si)).join('') : `<div class="no-items">Nenhum subtítulo ainda — esta aba aparece como um item simples até você adicionar um.</div>`}
+          ${subItems.length ? subItems.map(si=>renderManagerSubItemRow(si)).join('') : `<div class="no-items">Nenhum subtítulo ainda — esta aba aparece como um item simples até você adicionar um.</div>`}
           <div class="add-item-row">
             <input type="text" placeholder="Novo subtítulo (o que foi feito nesta tela)…" data-new-subitem-input="${it.id}">
             <button class="btn btn-sm" data-new-subitem-btn="${it.id}">Adicionar</button>
@@ -1013,48 +1042,43 @@
     </div>`;
   }
 
-  // Client-facing checklist rows (checkbox leaves, or an expandable "aba" when the item has subtítulos)
+  // Client-facing checklist rows (checkbox leaves, or an expandable "aba" when the item has subtítulos — at any depth)
   function checklistRows(client, items, checklistMap, target){
     if(items.length===0) return `<div class="no-items">Nenhum item cadastrado.</div>`;
-    return items.map(it=>{
-      const subItems = it.subItems || [];
-      const expandKey = client.id + '|' + it.id;
+    return items.map(it => checklistNodeRow(client, it, checklistMap, target)).join('');
+  }
 
-      if(subItems.length === 0){
-        const checked = !!checklistMap[it.id];
-        return `
-          <div class="check-row ${checked?'checked':''}">
-            <input type="checkbox" id="chk_${it.id}" data-check-item="${it.id}" data-check-target="${target}" ${checked?'checked':''}>
-            <label for="chk_${it.id}">${escapeHtml(it.texto)}</label>
-          </div>
-        `;
-      }
+  function checklistNodeRow(client, it, checklistMap, target){
+    const subItems = it.subItems || [];
+    const expandKey = client.id + '|' + it.id;
 
-      const done = subItems.filter(si=>checklistMap[si.id]).length;
-      const isOpen = expandedItems.has(expandKey);
+    if(subItems.length === 0){
+      const checked = !!checklistMap[it.id];
       return `
-        <div class="check-item">
-          <div class="tab-row ${isOpen?'open':''}" data-toggle-tab="${it.id}">
-            <span class="chevron">▸</span>
-            <span class="tab-label">${escapeHtml(it.texto)}</span>
-            <span class="badge">${done}/${subItems.length}</span>
-          </div>
-          ${isOpen ? `
-            <div class="tab-body">
-              ${subItems.map(si=>{
-                const checked = !!checklistMap[si.id];
-                return `
-                  <div class="check-row ${checked?'checked':''}">
-                    <input type="checkbox" id="chk_${si.id}" data-check-item="${si.id}" data-check-target="${target}" ${checked?'checked':''}>
-                    <label for="chk_${si.id}">${escapeHtml(si.texto)}</label>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          ` : ''}
+        <div class="check-row ${checked?'checked':''}">
+          <input type="checkbox" id="chk_${it.id}" data-check-item="${it.id}" data-check-target="${target}" ${checked?'checked':''}>
+          <label for="chk_${it.id}">${escapeHtml(it.texto)}</label>
         </div>
       `;
-    }).join('');
+    }
+
+    const leaves = leafItems(subItems);
+    const done = leaves.filter(si=>checklistMap[si.id]).length;
+    const isOpen = expandedItems.has(expandKey);
+    return `
+      <div class="check-item">
+        <div class="tab-row ${isOpen?'open':''}" data-toggle-tab="${it.id}">
+          <span class="chevron">▸</span>
+          <span class="tab-label">${escapeHtml(it.texto)}</span>
+          <span class="badge">${done}/${leaves.length}</span>
+        </div>
+        ${isOpen ? `
+          <div class="tab-body">
+            ${subItems.map(si => checklistNodeRow(client, si, checklistMap, target)).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
   }
 
   function progressStampHtml(p, extraClass){
@@ -1704,21 +1728,18 @@
     });
     document.querySelectorAll('[data-del-subitem]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        const [itemId, subId] = btn.getAttribute('data-del-subitem').split('|');
-        const item = locateItem(itemId);
-        if(item){ item.subItems = (item.subItems||[]).filter(si=>si.id!==subId); }
+        const nodeId = btn.getAttribute('data-del-subitem');
+        removeItemEverywhere(nodeId);
         await persist();
         render();
       });
     });
-    async function saveSubItem(key){
-      const [itemId, subId] = key.split('|');
-      const input = document.querySelector(`[data-edit-subitem-input="${key}"]`);
+    async function saveSubItem(nodeId){
+      const input = document.querySelector(`[data-edit-subitem-input="${nodeId}"]`);
       const texto = input.value.trim();
       if(!texto){ showToast('O texto não pode ficar vazio.'); return; }
-      const item = locateItem(itemId);
-      const si = item && (item.subItems||[]).find(s=>s.id===subId);
-      if(si) si.texto = texto;
+      const node = locateItem(nodeId);
+      if(node) node.texto = texto;
       editingSubItemKey = null;
       await persist();
       render();
@@ -1727,21 +1748,21 @@
       btn.addEventListener('click', ()=>saveSubItem(btn.getAttribute('data-save-subitem')));
     });
     document.querySelectorAll('[data-edit-subitem-input]').forEach(input=>{
-      const key = input.getAttribute('data-edit-subitem-input');
+      const nodeId = input.getAttribute('data-edit-subitem-input');
       input.addEventListener('keydown', (e)=>{
-        if(e.key==='Enter'){ e.preventDefault(); saveSubItem(key); }
+        if(e.key==='Enter'){ e.preventDefault(); saveSubItem(nodeId); }
         if(e.key==='Escape'){ e.preventDefault(); editingSubItemKey=null; render(); }
       });
       input.focus(); input.selectionStart = input.selectionEnd = input.value.length;
     });
     document.querySelectorAll('[data-new-subitem-btn]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
-        const itemId = btn.getAttribute('data-new-subitem-btn');
-        const input = document.querySelector(`[data-new-subitem-input="${itemId}"]`);
+        const parentId = btn.getAttribute('data-new-subitem-btn');
+        const input = document.querySelector(`[data-new-subitem-input="${parentId}"]`);
         const texto = input.value.trim();
         if(!texto){ showToast('Digite o texto do subtítulo.'); return; }
-        const item = locateItem(itemId);
-        if(item){ if(!item.subItems) item.subItems = []; item.subItems.push({id: uid('sub'), texto}); }
+        const parent = locateItem(parentId);
+        if(parent){ if(!parent.subItems) parent.subItems = []; parent.subItems.push({id: uid('sub'), texto, subItems: []}); }
         await persist();
         render();
       });
