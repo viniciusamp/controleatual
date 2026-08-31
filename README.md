@@ -1,14 +1,18 @@
 # Checklist de Instalação
 
-App single-file (HTML + CSS + JS puro, sem dependências) para acompanhar a
-implantação de sistemas em clientes: configuração inicial e treinamento,
-organizados por segmento de negócio (Material de Construção, Oficina,
-Mercearia, etc.) e por sistema (ex: Integra).
+App (HTML + CSS + JS puro) para acompanhar a implantação de sistemas em
+clientes: configuração inicial e treinamento, organizados por segmento de
+negócio (Material de Construção, Oficina, Mercearia, etc.) e por sistema
+(ex: Integra).
+
+Site publicado: https://viniciusamp.github.io/controleatual/
 
 ## Como usar
 
-Basta abrir o `index.html` em um navegador — não precisa de servidor nem
-build.
+O app é servido pelo GitHub Pages a partir do branch `main`. Qualquer
+pessoa com o link acessa e edita o checklist, sem login — os dados ficam
+salvos num banco Supabase compartilhado e atualizam ao vivo entre quem
+estiver com a página aberta.
 
 ## Estrutura de dados
 
@@ -20,9 +24,15 @@ build.
 - **Clientes**: vinculados a um segmento e a um ou mais sistemas, com
   checklist próprio de configuração e treinamento.
 
-## Dados e backup
+## Banco de dados (Supabase)
 
-Os dados são salvos automaticamente (via `window.storage`, oferecido pelo
-ambiente onde o app roda). Use os botões **Backup** (exporta um `.json`) e
-**Importar** no topo da tela para não perder o progresso ao migrar de
-ambiente ou fazer uma cópia de segurança.
+As credenciais do projeto Supabase ficam em `config.js` (a chave é
+`publishable`, feita pra ser exposta no navegador). O esquema das tabelas
+está em `supabase-schema.sql` — rode esse arquivo no SQL Editor do
+Supabase ao configurar um projeto novo.
+
+## Backup
+
+Use o botão **Backup** no topo da tela para exportar um `.json` com todo o
+estado atual, e **Importar** para restaurar a partir de um desses
+arquivos.
