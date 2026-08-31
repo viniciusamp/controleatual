@@ -420,7 +420,7 @@
 <script>
 (function(){
   const CLIENT_COLORS = ['#F2B33D','#38D39F','#FF6B6B','#8DA3FF','#D99A22','#9B7BFF'];
-  const STORAGE_KEY = 'installer-checklist-data-v1';
+  const STATE_FILE = 'data/state.json';
 
   // ---------------------------------------------------------------------
   // DATA MODEL (unchanged from the previous version)
@@ -506,18 +506,30 @@
   // LOAD / MIGRATE / PERSIST
   // ---------------------------------------------------------------------
 
+  let artifactCapability = null;
+
+  async function resolveArtifactCapability(){
+    try{
+      if(typeof claude !== 'undefined' && claude && typeof claude.use === 'function'){
+        return await claude.use('artifact');
+      }
+    }catch(e){ console.error('Falha ao obter capacidade de salvamento', e); }
+    return null;
+  }
+
   async function loadData(){
-    if(typeof window.storage === 'undefined' || !window.storage){
+    artifactCapability = await resolveArtifactCapability();
+    if(!artifactCapability){
       storageAvailable = false;
-      saveStatus = { state:'error', message:'Armazenamento indisponível neste ambiente. Seus dados ficam só nesta sessão — use "Backup" para não perder o trabalho.', time:null };
+      saveStatus = { state:'error', message:'Salvamento automático indisponível nesta visualização. Seus dados ficam só nesta sessão — use "Backup" para não perder o trabalho.', time:null };
       state = freshDefaultState();
       render();
       return;
     }
     try{
-      const res = await window.storage.get(STORAGE_KEY, false);
-      if(res && res.value){
-        const raw = JSON.parse(res.value);
+      const res = await fetch(STATE_FILE, {cache:'no-store'});
+      if(res.ok){
+        const raw = await res.json();
         state = migrateToCurrentShape(raw);
       } else {
         state = freshDefaultState();
@@ -664,28 +676,44 @@
     saveStatus = { state:'saving', message:'', time: saveStatus.time };
     render();
     try{
-      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
-      if(!result){
-        saveStatus = { state:'error', message:'O armazenamento não confirmou o salvamento.', time:new Date() };
-        console.error('Storage set returned no result', result);
-      } else {
-        saveStatus = { state:'ok', message:'', time:new Date() };
-      }
+      await artifactCapability.publish({ [STATE_FILE]: JSON.stringify(state) });
+      saveStatus = { state:'ok', message:'', time:new Date() };
     }catch(e){
-      console.error('Erro ao salvar no armazenamento', e);
-      const reason = (e && (e.message || String(e))) || 'erro desconhecido';
-      saveStatus = { state:'error', message:reason, time:new Date() };
+      console.error('Erro ao salvar', e);
+      if(e && (e.code==='not_writer' || e.code==='not_granted')){
+        storageAvailable = false;
+        saveStatus = { state:'error', message:'Esta visualização é somente leitura — as alterações não são salvas automaticamente.', time:new Date() };
+      } else if(e && e.code==='conflict'){
+        saveStatus = { state:'error', message:'Uma versão mais nova foi salva ao mesmo tempo. Atualize a página antes de continuar editando.', time:new Date() };
+      } else {
+        const reason = (e && (e.message || e.code)) || 'erro desconhecido';
+        saveStatus = { state:'error', message:reason, time:new Date() };
+      }
     }
   }
 
-  function downloadBackup(){
+  async function downloadBackup(){
+    const stamp = new Date().toISOString().slice(0,10);
+    const filename = `checklist-instalacao-backup-${stamp}.json`;
+    const data = JSON.stringify(state, null, 2);
     try{
-      const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+      const downloads = (typeof claude !== 'undefined' && claude && typeof claude.use === 'function')
+        ? await claude.use('downloads') : null;
+      if(downloads){
+        await downloads.save({ filename, data });
+        showToast('Backup baixado.');
+        return;
+      }
+    }catch(e){
+      if(e && e.code === 'declined') return;
+      console.error('Erro ao exportar backup pela capacidade de download', e);
+    }
+    try{
+      const blob = new Blob([data], {type: 'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      const stamp = new Date().toISOString().slice(0,10);
       a.href = url;
-      a.download = `checklist-instalacao-backup-${stamp}.json`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
