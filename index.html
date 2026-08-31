@@ -418,6 +418,7 @@
 <div id="toast" class="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script src="config.js"></script>
 <script>
 (function(){
@@ -571,6 +572,7 @@
       raw.segments = (raw.segments||[]).map(s=>({ id:s.id, name:s.name, color:s.color, extraConfig: withSubItems(s.extraConfig) }));
       raw.clients = (raw.clients||[]).map(c=>({
         id:c.id, name:c.name, segmentId:c.segmentId, info:c.info||'',
+        trainedBy: c.trainedBy||'', trainedPerson: c.trainedPerson||'',
         systemIds: c.systemIds||[], checklistConfig: c.checklistConfig||{}, checklistTraining: c.checklistTraining||{}
       }));
       return raw;
@@ -656,7 +658,7 @@
       });
       return {
         id: oldClient.id || uid('cli'), name: oldClient.name || 'Cliente', segmentId: oldClient.segmentId,
-        info: oldClient.info || '', systemIds: Array.from(systemIds),
+        info: oldClient.info || '', trainedBy: '', trainedPerson: '', systemIds: Array.from(systemIds),
         checklistConfig, checklistTraining
       };
     });
@@ -707,6 +709,110 @@
       saveStatus = { state:'error', message:reason, time:new Date() };
     }
     applyingRemoteUpdate = false;
+  }
+
+  function generateTrainingPdf(clientId){
+    const client = getClient(clientId);
+    if(!client) return;
+    if(typeof window.jspdf === 'undefined'){
+      showToast('⚠ Não foi possível carregar o gerador de PDF.');
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4' });
+    const marginX = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const lineHeight = 6;
+    let y = 22;
+
+    function ensureSpace(extra){
+      if(y + extra > pageHeight - 20){ doc.addPage(); y = 22; }
+    }
+    function addLabelValue(label, value){
+      ensureSpace(lineHeight);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+      doc.text(label + ':', marginX, y);
+      doc.setFont('helvetica','normal');
+      doc.text(String(value || '—'), marginX + 52, y);
+      y += lineHeight;
+    }
+    function addSectionTitle(text){
+      ensureSpace(lineHeight + 6);
+      y += 3;
+      doc.setFont('helvetica','bold'); doc.setFontSize(12.5);
+      doc.text(text, marginX, y);
+      y += 3;
+      doc.setDrawColor(190);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 6;
+    }
+    function addBullet(text, indent){
+      const x = marginX + (indent || 0);
+      const maxWidth = pageWidth - marginX - x;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10.5);
+      const lines = doc.splitTextToSize('• ' + text, maxWidth);
+      lines.forEach(line=>{
+        ensureSpace(lineHeight);
+        doc.text(line, x, y);
+        y += lineHeight - 1;
+      });
+    }
+
+    const seg = getSegment(client.segmentId);
+
+    doc.setFont('helvetica','bold'); doc.setFontSize(18);
+    doc.text('Relatório de Treinamento', marginX, y);
+    y += 6;
+    doc.setDrawColor(210);
+    doc.line(marginX, y, pageWidth - marginX, y);
+    y += 8;
+
+    addLabelValue('Cliente', client.name);
+    addLabelValue('Segmento', seg ? seg.name : '—');
+    addLabelValue('Responsável pelo treinamento', client.trainedBy);
+    addLabelValue('Pessoa treinada', client.trainedPerson);
+    addLabelValue('Data', new Date().toLocaleDateString('pt-BR'));
+
+    addSectionTitle('Itens de treinamento concluídos');
+
+    const systems = clientTrainingSystems(client);
+    let anyChecked = false;
+
+    if(systems.length === 0){
+      addBullet('Nenhum sistema associado a este cliente.', 0);
+    } else {
+      systems.forEach(sys=>{
+        const checkedTopics = [];
+        sys.topics.forEach(topic=>{
+          const subItems = topic.subItems || [];
+          if(subItems.length){
+            const doneSubs = subItems.filter(si=>client.checklistTraining[si.id]);
+            if(doneSubs.length){ checkedTopics.push({ texto: topic.texto, subs: doneSubs.map(s=>s.texto) }); }
+          } else if(client.checklistTraining[topic.id]){
+            checkedTopics.push({ texto: topic.texto, subs: null });
+          }
+        });
+        if(checkedTopics.length === 0) return;
+        anyChecked = true;
+        ensureSpace(lineHeight + 2);
+        doc.setFont('helvetica','bold'); doc.setFontSize(11);
+        doc.text(sys.name, marginX, y);
+        y += lineHeight;
+        checkedTopics.forEach(t=>{
+          addBullet(t.texto, 4);
+          if(t.subs){ t.subs.forEach(s => addBullet(s, 10)); }
+        });
+        y += 2;
+      });
+      if(!anyChecked){
+        addBullet('Nenhum item de treinamento concluído até o momento.', 0);
+      }
+    }
+
+    const stamp = new Date().toISOString().slice(0,10);
+    const safeName = client.name.replace(/[^\w-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'') || 'cliente';
+    doc.save(`treinamento-${safeName}-${stamp}.pdf`);
   }
 
   function downloadBackup(){
@@ -1094,6 +1200,7 @@
               <h2 class="client-title">${escapeHtml(selected.name)}</h2>
               <div class="client-meta">${selected.info ? escapeHtml(selected.info) : 'Sem observações adicionais'}</div>
               <div class="client-meta" style="margin-top:6px;">Sistemas: ${systems.length ? systems.map(s=>escapeHtml(s.name)).join(', ') : 'nenhum selecionado'}</div>
+              <div class="client-meta" style="margin-top:6px;">Responsável pelo treinamento: ${selected.trainedBy ? escapeHtml(selected.trainedBy) : '—'} · Pessoa treinada: ${selected.trainedPerson ? escapeHtml(selected.trainedPerson) : '—'}</div>
             </div>
             ${progressStampHtml(p)}
           </div>
@@ -1104,6 +1211,9 @@
           <div class="jump-links">
             <button class="btn btn-sm" data-goto-tab="configuracoes">⚙️ Ver configuração (${p.configDone}/${p.configTotal})</button>
             <button class="btn btn-sm" data-goto-tab="treinamento">🎓 Ver treinamento (${p.trainDone}/${p.trainTotal})</button>
+          </div>
+          <div class="jump-links">
+            <button class="btn btn-sm btn-primary" id="btnGerarPdf" data-gerar-pdf="${selected.id}">📄 Gerar PDF de treinamento</button>
           </div>
         </div>
       `;
@@ -1343,6 +1453,14 @@
             </div>
           </div>
           <div class="field">
+            <label>Responsável pelo treinamento <span style="text-transform:none;font-weight:400;color:var(--ink-faint);">(quem da sua equipe treinou)</span></label>
+            <input type="text" id="modalClientTrainedBy" value="${client?escapeHtml(client.trainedBy||''):''}" placeholder="Nome de quem treinou">
+          </div>
+          <div class="field">
+            <label>Pessoa treinada <span style="text-transform:none;font-weight:400;color:var(--ink-faint);">(quem do cliente recebeu o treinamento)</span></label>
+            <input type="text" id="modalClientTrainedPerson" value="${client?escapeHtml(client.trainedPerson||''):''}" placeholder="Nome de quem foi treinado">
+          </div>
+          <div class="field">
             <label>Observações (opcional)</label>
             <input type="text" id="modalClientInfo" value="${client?escapeHtml(client.info||''):''}" placeholder="Telefone, endereço, versão do sistema…">
           </div>
@@ -1415,13 +1533,15 @@
         const name = overlay.querySelector('#modalClientName').value.trim();
         const segmentId = overlay.querySelector('#modalClientSegment').value;
         const info = overlay.querySelector('#modalClientInfo').value.trim();
+        const trainedBy = overlay.querySelector('#modalClientTrainedBy').value.trim();
+        const trainedPerson = overlay.querySelector('#modalClientTrainedPerson').value.trim();
         const systemIds = Array.from(overlay.querySelectorAll('[data-modal-system-checkbox]:checked')).map(cb=>cb.value);
         if(!name){ showToast('Digite o nome do cliente.'); return; }
         if(modal.payload && modal.payload.clientId){
           const c = getClient(modal.payload.clientId);
-          c.name = name; c.segmentId = segmentId; c.info = info; c.systemIds = systemIds;
+          c.name = name; c.segmentId = segmentId; c.info = info; c.trainedBy = trainedBy; c.trainedPerson = trainedPerson; c.systemIds = systemIds;
         } else {
-          const newClient = {id: uid('cli'), name, segmentId, info, systemIds, checklistConfig:{}, checklistTraining:{}};
+          const newClient = {id: uid('cli'), name, segmentId, info, trainedBy, trainedPerson, systemIds, checklistConfig:{}, checklistTraining:{}};
           state.clients.push(newClient);
           selectedClientId = newClient.id;
         }
@@ -1521,6 +1641,9 @@
     if(btnEditClient) btnEditClient.addEventListener('click', ()=>{ modal={type:'editClient', payload:{clientId:selectedClientId}}; renderModal(); });
     const btnDeleteClient = document.getElementById('btnDeleteClient');
     if(btnDeleteClient) btnDeleteClient.addEventListener('click', ()=>{ modal={type:'confirmDeleteClient', payload:{clientId:selectedClientId}}; renderModal(); });
+    document.querySelectorAll('[data-gerar-pdf]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ generateTrainingPdf(btn.getAttribute('data-gerar-pdf')); });
+    });
 
     // --- Client checklist checkboxes ---
     document.querySelectorAll('[data-check-item]').forEach(cb=>{
