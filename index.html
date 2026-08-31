@@ -704,22 +704,9 @@
         showToast('Backup baixado.');
         return;
       }
+      showToast('⚠ Backup indisponível nesta página compartilhada. Peça a exportação a quem administra o checklist.');
     }catch(e){
       if(e && e.code === 'declined') return;
-      console.error('Erro ao exportar backup pela capacidade de download', e);
-    }
-    try{
-      const blob = new Blob([data], {type: 'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('Backup baixado.');
-    }catch(e){
       console.error('Erro ao exportar backup', e);
       showToast('⚠ Não foi possível gerar o backup.');
     }
