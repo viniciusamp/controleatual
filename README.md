@@ -36,3 +36,11 @@ Supabase ao configurar um projeto novo.
 Use o botão **Backup** no topo da tela para exportar um `.json` com todo o
 estado atual, e **Importar** para restaurar a partir de um desses
 arquivos.
+
+## Ferramentas
+
+- `ferramentas/limpeza-windows.bat`: script para limpar arquivos temporários,
+  caches (Windows, navegadores, miniaturas, DNS), lixeira e relatórios de erro
+  do Windows. Tem modo rápido e completo (inclui cache do Windows Update,
+  DISM, SFC e otimização do disco). Basta dar dois cliques — ele pede
+  permissão de Administrador sozinho e salva um log na Área de Trabalho.
