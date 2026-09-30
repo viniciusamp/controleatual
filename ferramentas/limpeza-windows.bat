@@ -140,11 +140,17 @@ goto FIM
 
 :: Apaga todo o conteudo de uma pasta, mantendo a pasta em si.
 :: Arquivos em uso sao ignorados silenciosamente.
+:: Trava de seguranca: so aceita caminhos completos (ex: C:\pasta) e
+:: nunca a raiz de um disco, para evitar apagar algo por engano.
 :LIMPAR_PASTA
-if not exist "%~1\" exit /b
-echo    - %~1 >> "%LOG%"
-del /f /s /q "%~1\*" >nul 2>&1
-for /d %%D in ("%~1\*") do rd /s /q "%%D" >nul 2>&1
+if "%~1"=="" exit /b
+set "ALVO=%~1"
+if not "%ALVO:~1,2%"==":\" exit /b
+if "%ALVO:~3%"=="" exit /b
+if not exist "%ALVO%\" exit /b
+echo    - %ALVO% >> "%LOG%"
+del /f /s /q "%ALVO%\*" >nul 2>&1
+for /d %%D in ("%ALVO%\*") do rd /s /q "%%D" >nul 2>&1
 exit /b
 
 :: Mostra o espaco livre da unidade C: em GB.
