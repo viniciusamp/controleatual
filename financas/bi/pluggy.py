@@ -99,13 +99,51 @@ def _get(path: str, token: str, **params) -> dict:
     if r.status_code == 404 and path == "/accounts":
         raise RuntimeError("Item não encontrado. Confira o PLUGGY_ITEM_ID e se ele pertence "
                            "à mesma aplicação do Client ID.")
-    r.raise_for_status()
+    if r.status_code >= 400:
+        raise RuntimeError(f"Pluggy respondeu {r.status_code} em {path}: {r.text[:300]}")
     return r.json()
 
 
 def _data_local(valor: str) -> pd.Timestamp:
     ts = pd.to_datetime(valor, utc=True)
     return ts.tz_convert("America/Sao_Paulo").tz_localize(None).normalize()
+
+
+def _valor_cartao(t: dict) -> float:
+    """No BI: compra > 0, pagamento/estorno < 0. Usa o tipo; se faltar, o sinal do valor."""
+    valor = abs(float(t["amount"]))
+    tipo = (t.get("type") or "").upper()
+    if tipo == "DEBIT":
+        return valor
+    if tipo == "CREDIT":
+        return -valor
+    return float(t["amount"])
+
+
+def _transacoes(token: str, conta_id: str, inicio: str, max_paginas: int = 200):
+    """GET /v2/transactions com paginação por cursor (o GET /transactions antigo responde 410)."""
+    params = {"accountId": conta_id, "dateFrom": inicio}
+    vistos = set()
+    for _ in range(max_paginas):
+        resp = _get("/v2/transactions", token, **params)
+        yield from resp.get("results") or []
+        cursor = _cursor(resp.get("next"))
+        if not cursor or cursor in vistos:
+            return
+        vistos.add(cursor)
+        params = {"accountId": conta_id, "dateFrom": inicio, "after": cursor}
+
+
+def _cursor(proximo: str | None) -> str | None:
+    """'next' vem como query string (?accountId=...&after=<cursor>) ou null na última página."""
+    if not proximo:
+        return None
+    from urllib.parse import parse_qs, urlparse
+    query = urlparse(proximo).query if "://" in proximo or proximo.startswith("/") else proximo.lstrip("?")
+    valores = parse_qs(query).get("after")
+    if valores:
+        return valores[0]
+    return None if "=" in proximo else proximo
 
 
 def sincronizar(dias: int = 365) -> tuple[pd.DataFrame, dict]:
@@ -125,25 +163,18 @@ def sincronizar(dias: int = 365) -> tuple[pd.DataFrame, dict]:
         info["fechamento"] = info["fechamento"] or cd.get("balanceCloseDate")
         info["vencimento"] = info["vencimento"] or cd.get("balanceDueDate")
 
-        pagina, total = 1, 1
-        while pagina <= total:
-            resp = _get("/transactions", token, accountId=conta["id"], **{"from": inicio},
-                        pageSize=500, page=pagina)
-            total = resp.get("totalPages", 1)
-            for t in resp["results"]:
-                meta = t.get("creditCardMetadata") or {}
-                total_parc = meta.get("totalInstallments") or 1
-                parcela = f"{meta.get('installmentNumber')}/{total_parc}" if total_parc > 1 else None
-                # Em contas de cartão da Pluggy: valor positivo = compra, negativo = pagamento/estorno
-                linhas.append({
-                    "id": f"pluggy-{t['id']}",
-                    "data": _data_local(t["date"]),
-                    "descricao": t.get("description") or "",
-                    "valor": float(t["amount"]),
-                    "parcela": parcela,
-                    "origem": "pluggy",
-                    "categoria_banco": traduzir_categoria(t.get("category")) or t.get("category"),
-                })
-            pagina += 1
+        for t in _transacoes(token, conta["id"], inicio):
+            meta = t.get("creditCardMetadata") or {}
+            total_parc = meta.get("totalInstallments") or 1
+            parcela = f"{meta.get('installmentNumber')}/{total_parc}" if total_parc > 1 else None
+            linhas.append({
+                "id": f"pluggy-{t['id']}",
+                "data": _data_local(t["date"]),
+                "descricao": t.get("description") or "",
+                "valor": _valor_cartao(t),
+                "parcela": parcela,
+                "origem": "pluggy",
+                "categoria_banco": traduzir_categoria(t.get("category")) or t.get("category"),
+            })
     df = pd.DataFrame(linhas, columns=["id", *COLUNAS, "categoria_banco"])
     return df, info
