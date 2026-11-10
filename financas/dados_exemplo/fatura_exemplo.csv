@@ -1,0 +1,217 @@
+date,title,amount
+2026-06-01,Drogasil,83.44
+2026-06-02,Drogasil,110.59
+2026-06-03,Drogasil,80.82
+2026-06-03,Padaria Pao Quente,15.53
+2026-06-03,Posto Shell,139.67
+2026-06-03,Smartfit,119.90
+2026-06-04,Cinemark,62.92
+2026-06-04,Posto Shell,112.61
+2026-06-04,Uber *Trip,44.51
+2026-06-05,Netflix.Com,55.90
+2026-06-06,Loja Generica Xyz,65.05
+2026-06-06,Uber *Trip,20.64
+2026-06-07,Supermercado Bom Preco,331.71
+2026-06-08,Spotify,21.90
+2026-06-09,Ifood *Ifood,27.40
+2026-06-09,Supermercado Bom Preco,284.06
+2026-06-10,Loja Generica Xyz,113.25
+2026-06-10,Posto Shell,166.85
+2026-06-10,Starbucks,33.13
+2026-06-10,Vivo Fibra,99.99
+2026-06-12,Amazon Prime Canal,19.90
+2026-06-13,Drogasil,34.94
+2026-06-14,Loja Generica Xyz,136.45
+2026-06-14,Starbucks,38.39
+2026-06-14,Supermercado Bom Preco,321.73
+2026-06-15,Uber *Trip,12.38
+2026-06-17,Posto Shell,171.21
+2026-06-18,Magazine Luiza - Parcela 1/10,249.90
+2026-06-19,Starbucks,28.88
+2026-06-20,Drogasil,32.92
+2026-06-20,Google One,9.99
+2026-06-23,Starbucks,23.25
+2026-06-24,Ifood *Ifood,57.87
+2026-06-27,Starbucks,37.55
+2026-06-28,Mercadolivre*Loja,276.97
+2026-06-28,Pagamento recebido,-2585.95
+2026-07-01,Padaria Pao Quente,17.13
+2026-07-02,Starbucks,25.17
+2026-07-03,Mercadolivre*Loja,95.30
+2026-07-03,Padaria Pao Quente,26.12
+2026-07-03,Smartfit,119.90
+2026-07-04,Mercadolivre*Loja,142.01
+2026-07-05,Netflix.Com,55.90
+2026-07-05,Padaria Pao Quente,14.83
+2026-07-08,Spotify,21.90
+2026-07-09,Posto Shell,106.33
+2026-07-09,Starbucks,38.30
+2026-07-10,Vivo Fibra,99.99
+2026-07-11,Mercadolivre*Loja,174.53
+2026-07-12,Amazon Prime Canal,19.90
+2026-07-12,Posto Shell,147.78
+2026-07-13,Starbucks,25.46
+2026-07-13,Uber *Trip,41.20
+2026-07-15,Cinemark,65.16
+2026-07-15,Drogasil,70.82
+2026-07-15,Supermercado Bom Preco,139.29
+2026-07-15,Uber *Trip,22.75
+2026-07-17,Cinemark,77.08
+2026-07-17,Starbucks,30.22
+2026-07-17,Uber *Trip,26.92
+2026-07-18,Magazine Luiza - Parcela 2/10,249.90
+2026-07-18,Uber *Trip,13.88
+2026-07-20,Cinemark,66.26
+2026-07-20,Google One,9.99
+2026-07-20,Starbucks,29.27
+2026-07-22,Supermercado Bom Preco,304.76
+2026-07-23,Supermercado Bom Preco,196.51
+2026-07-23,Supermercado Bom Preco,253.73
+2026-07-25,Ifood *Ifood,83.11
+2026-07-26,Drogasil,32.23
+2026-07-27,Posto Shell,167.13
+2026-07-28,Pagamento recebido,-2036.36
+2026-08-01,Ifood *Ifood,76.96
+2026-08-01,Supermercado Bom Preco,120.81
+2026-08-02,Supermercado Bom Preco,325.70
+2026-08-03,Smartfit,119.90
+2026-08-04,Loja Generica Xyz,112.42
+2026-08-05,Netflix.Com,55.90
+2026-08-05,Starbucks,29.70
+2026-08-08,Spotify,21.90
+2026-08-08,Starbucks,34.80
+2026-08-09,Ifood *Ifood,38.83
+2026-08-09,Padaria Pao Quente,22.70
+2026-08-10,Vivo Fibra,99.99
+2026-08-12,Amazon Prime Canal,19.90
+2026-08-12,Loja Generica Xyz,162.93
+2026-08-14,Starbucks,36.20
+2026-08-14,Supermercado Bom Preco,346.37
+2026-08-15,Mercadolivre*Loja,144.36
+2026-08-15,Padaria Pao Quente,25.89
+2026-08-16,Posto Shell,233.35
+2026-08-17,Magazine Luiza - Parcela 3/10,249.90
+2026-08-17,Starbucks,18.41
+2026-08-18,Supermercado Bom Preco,228.04
+2026-08-20,Google One,9.99
+2026-08-22,Cinemark,76.87
+2026-08-24,Uber *Trip,17.24
+2026-08-25,Cinemark,39.16
+2026-08-25,Ifood *Ifood,76.95
+2026-08-26,Cinemark,62.79
+2026-08-26,Mercadolivre*Loja,205.32
+2026-08-26,Mercadolivre*Loja,224.99
+2026-08-26,Uber *Trip,43.22
+2026-08-27,Posto Shell,231.09
+2026-08-27,Restaurante Sabor Caseiro,35.14
+2026-08-27,Restaurante Sabor Caseiro,79.69
+2026-08-27,Uber *Trip,33.80
+2026-08-28,Pagamento recebido,-1937.88
+2026-09-01,Ifood *Ifood,76.36
+2026-09-01,Starbucks,34.68
+2026-09-03,Smartfit,119.90
+2026-09-04,Uber *Trip,40.01
+2026-09-05,Mercadolivre*Loja,204.95
+2026-09-05,Netflix.Com,55.90
+2026-09-05,Uber *Trip,15.37
+2026-09-07,Padaria Pao Quente,21.03
+2026-09-08,Spotify,21.90
+2026-09-08,Uber *Trip,27.51
+2026-09-09,Cinemark,39.68
+2026-09-10,Vivo Fibra,99.99
+2026-09-12,Amazon Prime Canal,19.90
+2026-09-12,Padaria Pao Quente,10.17
+2026-09-12,Restaurante Sabor Caseiro,68.54
+2026-09-12,Starbucks,21.23
+2026-09-12,Supermercado Bom Preco,288.42
+2026-09-12,Uber *Trip,32.25
+2026-09-15,Posto Shell,124.35
+2026-09-16,Cinemark,54.19
+2026-09-16,Magazine Luiza - Parcela 4/10,249.90
+2026-09-17,Drogasil,56.67
+2026-09-17,Posto Shell,173.92
+2026-09-17,Supermercado Bom Preco,86.24
+2026-09-18,Starbucks,35.14
+2026-09-19,Ifood *Ifood,34.83
+2026-09-20,Google One,9.99
+2026-09-20,Padaria Pao Quente,9.42
+2026-09-20,Padaria Pao Quente,17.83
+2026-09-21,Drogasil,106.33
+2026-09-21,Padaria Pao Quente,14.02
+2026-09-24,Mercadolivre*Loja,248.86
+2026-09-24,Padaria Pao Quente,15.15
+2026-09-26,Posto Shell,135.91
+2026-09-28,Pagamento recebido,-2588.20
+2026-09-28,Uber *Trip,18.86
+2026-10-02,Uber *Trip,36.13
+2026-10-03,Cinemark,38.32
+2026-10-03,Cinemark,72.00
+2026-10-03,Smartfit,119.90
+2026-10-05,Drogasil,93.84
+2026-10-05,Netflix.Com,55.90
+2026-10-05,Posto Shell,112.45
+2026-10-08,Spotify,21.90
+2026-10-08,Supermercado Bom Preco,257.80
+2026-10-09,Starbucks,33.54
+2026-10-09,Supermercado Bom Preco,156.12
+2026-10-10,Vivo Fibra,99.99
+2026-10-12,Amazon Prime Canal,19.90
+2026-10-12,Cinemark,38.40
+2026-10-13,Mercadolivre*Loja,142.47
+2026-10-13,Mercadolivre*Loja,278.37
+2026-10-14,Supermercado Bom Preco,224.34
+2026-10-15,Ifood *Ifood,83.47
+2026-10-16,Drogasil,89.70
+2026-10-16,Ifood *Ifood,79.02
+2026-10-16,Magazine Luiza - Parcela 5/10,249.90
+2026-10-16,Uber *Trip,13.95
+2026-10-18,Mercadolivre*Loja,112.24
+2026-10-19,Restaurante Sabor Caseiro,58.90
+2026-10-20,Google One,9.99
+2026-10-20,Padaria Pao Quente,21.41
+2026-10-21,Cinemark,50.02
+2026-10-21,Drogasil,77.79
+2026-10-21,Restaurante Sabor Caseiro,85.72
+2026-10-22,Mercadolivre*Loja,130.22
+2026-10-22,Padaria Pao Quente,31.87
+2026-10-23,Supermercado Bom Preco,311.98
+2026-10-26,Loja Generica Xyz,118.47
+2026-10-27,Loja Generica Xyz,97.44
+2026-10-27,Supermercado Bom Preco,196.24
+2026-10-28,Pagamento recebido,-1952.49
+2026-11-03,Ifood *Ifood,78.38
+2026-11-03,Loja Generica Xyz,156.45
+2026-11-03,Posto Shell,186.16
+2026-11-03,Smartfit,119.90
+2026-11-04,Restaurante Sabor Caseiro,106.06
+2026-11-04,Starbucks,30.56
+2026-11-04,Uber *Trip,28.89
+2026-11-05,Netflix.Com,55.90
+2026-11-05,Padaria Pao Quente,18.66
+2026-11-07,Starbucks,18.82
+2026-11-08,Ifood *Ifood,28.03
+2026-11-08,Spotify,21.90
+2026-11-10,Cinemark,60.45
+2026-11-10,Supermercado Bom Preco,193.17
+2026-11-10,Vivo Fibra,99.99
+2026-11-12,Amazon Prime Canal,19.90
+2026-11-12,Posto Shell,114.61
+2026-11-12,Uber *Trip,31.23
+2026-11-14,Cinemark,31.96
+2026-11-14,Mercadolivre*Loja,58.16
+2026-11-15,Magazine Luiza - Parcela 6/10,249.90
+2026-11-15,Restaurante Sabor Caseiro,62.12
+2026-11-16,Posto Shell,202.06
+2026-11-16,Starbucks,37.25
+2026-11-18,Uber *Trip,26.01
+2026-11-19,Ifood *Ifood,63.06
+2026-11-19,Uber *Trip,13.97
+2026-11-19,Uber *Trip,30.85
+2026-11-20,Google One,9.99
+2026-11-21,Loja Generica Xyz,122.85
+2026-11-25,Mercadolivre*Loja,121.68
+2026-11-25,Supermercado Bom Preco,172.36
+2026-11-26,Posto Shell,126.97
+2026-11-26,Restaurante Sabor Caseiro,100.66
+2026-11-27,Starbucks,33.00
+2026-11-28,Pagamento recebido,-2051.00

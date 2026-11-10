@@ -1,0 +1,9 @@
+services:
+  bi:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./dados:/app/dados   # banco SQLite fica fora do container

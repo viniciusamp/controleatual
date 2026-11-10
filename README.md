@@ -36,3 +36,8 @@ Supabase ao configurar um projeto novo.
 Use o botão **Backup** no topo da tela para exportar um `.json` com todo o
 estado atual, e **Importar** para restaurar a partir de um desses
 arquivos.
+
+## BI Financeiro
+
+A pasta [`financas/`](financas/) contém um painel pessoal (Python/Streamlit)
+de gastos do cartão Nubank. Veja o [README dele](financas/README.md).
