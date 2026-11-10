@@ -103,3 +103,50 @@ def sugestoes(df_mes: pd.DataFrame, df_hist: pd.DataFrame, rec: pd.DataFrame,
         dicas.append(f"A fatura usa **{fatura_atual / limite:.0%} do limite**. Acima de 30% já pesa "
                      "no score de crédito.")
     return dicas
+
+
+def parcelas_em_aberto(df: pd.DataFrame) -> pd.DataFrame:
+    """Compras parceladas que ainda têm parcelas a vencer (uma linha por compra)."""
+    parc = df[(df["valor"] > 0) & df["parcela"].notna() & (df["parcela"] != "")].copy()
+    if parc.empty:
+        return pd.DataFrame()
+    nums = parc["parcela"].str.extract(r"(\d+)\s*/\s*(\d+)").astype(float)
+    parc["n"], parc["total"] = nums[0], nums[1]
+    parc = parc.dropna(subset=["n", "total"])
+    parc["chave"] = parc["descricao"].map(chave_estabelecimento)
+    parc["mes"] = pd.PeriodIndex(parc["mes_fatura"], freq="M")
+    ultimo_mes = pd.PeriodIndex(df["mes_fatura"], freq="M").max()
+    linhas = []
+    for (chave, valor, total), g in parc.groupby(["chave", parc["valor"].round(2), "total"]):
+        n = g["n"].max()
+        ultimas = g[g["n"] == n]
+        mes = ultimas["mes"].max()
+        restantes = int(total - n)
+        if restantes <= 0 or mes < ultimo_mes - 1:   # quitada ou sem cobrança recente
+            continue
+        linhas.append({
+            "Compra": ultimas.iloc[-1]["descricao"],
+            "Categoria": ultimas.iloc[-1]["categoria"],
+            "Parcela": float(valor) * len(ultimas),
+            "Pagas": f"{int(n)}/{int(total)}",
+            "Faltam": restantes,
+            "Ainda a pagar": float(valor) * len(ultimas) * restantes,
+            "Termina em": (mes + restantes).strftime("%m/%Y"),
+            "_mes": mes,
+        })
+    if not linhas:
+        return pd.DataFrame()
+    return pd.DataFrame(linhas).sort_values("Ainda a pagar", ascending=False)
+
+
+def projecao_parcelas(abertas: pd.DataFrame) -> pd.DataFrame:
+    """Quanto das próximas faturas já está comprometido com parcelas."""
+    if abertas.empty:
+        return pd.DataFrame()
+    linhas = []
+    for _, l in abertas.iterrows():
+        for i in range(1, l["Faltam"] + 1):
+            linhas.append({"mes": l["_mes"] + i, "valor": l["Parcela"]})
+    proj = pd.DataFrame(linhas).groupby("mes")["valor"].sum().reset_index().sort_values("mes")
+    proj["Fatura"] = proj["mes"].dt.strftime("%m/%Y")
+    return proj

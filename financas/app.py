@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import hmac
 import os
-from datetime import datetime, timedelta
+import time
+from datetime import date, datetime, timedelta
 
 import pandas as pd
 import plotly.express as px
@@ -39,16 +40,33 @@ MAX_FATIAS = 7
 
 
 # ---------------------------------------------------------------- login
+MAX_TENTATIVAS, MINUTOS_BLOQUEIO = 5, 15
+
+
 def exigir_senha() -> None:
     senha = os.environ.get("APP_PASSWORD")
     if not senha or st.session_state.get("ok"):
         return
     st.title("🔒 Meu BI Financeiro")
-    digitada = st.text_input("Senha", type="password")
-    if st.button("Entrar"):
+    bloqueio = db.get_config("login_bloqueado_ate")
+    if bloqueio and datetime.now() < datetime.fromisoformat(bloqueio):
+        st.error(f"Muitas tentativas erradas. Tente de novo às {datetime.fromisoformat(bloqueio):%H:%M}.")
+        st.stop()
+    with st.form("login"):
+        digitada = st.text_input("Senha", type="password")
+        entrar = st.form_submit_button("Entrar")
+    if entrar:
         if hmac.compare_digest(digitada.encode(), senha.encode()):
+            db.set_config("login_falhas", 0)
             st.session_state.ok = True
             st.rerun()
+        time.sleep(1)
+        falhas = int(db.get_config("login_falhas", 0)) + 1
+        if falhas >= MAX_TENTATIVAS:
+            db.set_config("login_bloqueado_ate",
+                          (datetime.now() + timedelta(minutes=MINUTOS_BLOQUEIO)).isoformat())
+            falhas = 0
+        db.set_config("login_falhas", falhas)
         st.error("Senha incorreta.")
     st.stop()
 
@@ -101,6 +119,9 @@ with st.sidebar:
         db.set_config("limite", limite)
         db.set_config("fechamento", fechamento)
         st.success("Salvo.")
+
+    if not os.environ.get("APP_PASSWORD"):
+        st.warning("Sem senha: defina APP_PASSWORD no arquivo .env.")
 
     st.header("📥 Dados")
     arquivos = st.file_uploader("Importar fatura/extrato Nubank (CSV ou OFX)",
@@ -187,7 +208,25 @@ k2.metric("Limite usado", f"{usado / limite:.0%}" if limite else "—", brl(usad
 k3.metric("Limite disponível", brl(max(limite - usado, 0)))
 k4.metric("Recorrentes / mês", brl(rec_mensal), f"{len(rec)} cobranças", delta_color="off", delta_arrow="off")
 
-aba_painel, aba_rec, aba_tx = st.tabs(["📊 Painel", "🔁 Assinaturas e recorrentes", "🧾 Transações"])
+aba_painel, aba_exp, aba_cartao, aba_rec, aba_tx = st.tabs(
+    ["📊 Painel", "🔎 Explorar", "💳 Meu cartão", "🔁 Assinaturas", "🧾 Transações"])
+
+
+def barras(dados: pd.DataFrame, x: str, y: str, horizontal: bool = False, altura: int = 380):
+    """Barras de uma série só: uma cor, valor em R$ no hover e no rótulo."""
+    dados = dados.assign(_txt=dados[y if not horizontal else x].map(brl))
+    fig = px.bar(dados, x=x, y=y, orientation="h" if horizontal else "v", custom_data=["_txt"],
+                 text="_txt" if horizontal else None)
+    eixo = "%{y}" if horizontal else "%{x}"
+    fig.update_traces(marker_color=PALETA[0], marker_line_width=0, textposition="outside", cliponaxis=False,
+                      hovertemplate=eixo + "<br>%{customdata[0]}<extra></extra>")
+    fig.update_layout(margin=dict(t=10, b=10, l=10, r=70 if horizontal else 10), height=altura,
+                      xaxis_title="", yaxis_title="", bargap=0.3)
+    if horizontal:
+        fig.update_yaxes(autorange="reversed")
+        fig.update_xaxes(showticklabels=False, showgrid=False)
+    return fig
+
 
 # ---------------------------------------------------------------- painel
 with aba_painel:
@@ -235,6 +274,164 @@ with aba_painel:
         st.subheader("💡 Onde economizar")
         for dica in analise.sugestoes(df_mes, df, rec, limite, usado):
             st.markdown(f"- {dica}")
+
+# ---------------------------------------------------------------- explorar
+with aba_exp:
+    gastos = df[df["valor"] > 0].copy()
+    gastos["estab"] = gastos["descricao"].map(analise.chave_estabelecimento)
+    dmin, dmax = gastos["data"].min().date(), gastos["data"].max().date()
+
+    with st.expander("Filtros", expanded=True):
+        f1, f2, f3 = st.columns([2, 3, 2])
+        periodo = f1.date_input("Período", (max(dmin, dmax - timedelta(days=90)), dmax),
+                                min_value=dmin, max_value=dmax, format="DD/MM/YYYY")
+        cats_sel = f2.multiselect("Categorias", sorted(gastos["categoria"].dropna().unique()),
+                                  placeholder="Todas")
+        tipo = f3.selectbox("Tipo de compra", ["Todas", "À vista", "Parceladas"])
+        f4, f5 = st.columns([3, 4])
+        busca = f4.text_input("Buscar na descrição", placeholder="ex.: ifood, uber, mercado")
+        teto = float(max(gastos["valor"].max(), 1))
+        vmin, vmax = f5.slider("Valor da compra (R$)", 0.0, teto, (0.0, teto), step=1.0)
+
+    ini, fim = (periodo if len(periodo) == 2 else (periodo[0], periodo[0])) if isinstance(periodo, tuple) else (periodo, periodo)
+    filt = gastos[(gastos["data"].dt.date >= ini) & (gastos["data"].dt.date <= fim)
+                  & gastos["valor"].between(vmin, vmax)]
+    if cats_sel:
+        filt = filt[filt["categoria"].isin(cats_sel)]
+    if tipo != "Todas":
+        parcelada = filt["parcela"].notna() & (filt["parcela"] != "")
+        filt = filt[parcelada if tipo == "Parceladas" else ~parcelada]
+    if busca.strip():
+        filt = filt[filt["descricao"].str.contains(busca.strip(), case=False, regex=False)]
+
+    if filt.empty:
+        st.info("Nenhuma compra com esses filtros.")
+    else:
+        dias = max((fim - ini).days + 1, 1)
+        e1, e2, e3, e4 = st.columns(4)
+        e1.metric("Total no período", brl(filt["valor"].sum()))
+        e2.metric("Compras", len(filt))
+        e3.metric("Valor médio por compra", brl(filt["valor"].mean()))
+        e4.metric("Média por dia", brl(filt["valor"].sum() / dias))
+
+        visao = st.segmented_control(
+            "Ver por", ["Dia a dia", "Mês a mês", "Categoria", "Estabelecimento", "Dia da semana", "Mapa"],
+            default="Dia a dia") or "Dia a dia"
+
+        if visao == "Dia a dia":
+            d = filt.groupby(filt["data"].dt.date)["valor"].sum().reset_index()
+            d.columns = ["Dia", "Valor"]
+            st.plotly_chart(barras(d, "Dia", "Valor"), width="stretch")
+        elif visao == "Mês a mês":
+            d = filt.groupby(filt["data"].dt.to_period("M"))["valor"].sum().reset_index()
+            d.columns = ["Mês", "Valor"]
+            d["Mês"] = d["Mês"].dt.strftime("%m/%Y")
+            fig = barras(d, "Mês", "Valor")
+            fig.update_xaxes(type="category")
+            st.plotly_chart(fig, width="stretch")
+        elif visao == "Categoria":
+            d = filt.groupby("categoria")["valor"].sum().sort_values(ascending=False).reset_index()
+            st.plotly_chart(barras(d, "valor", "categoria", horizontal=True, altura=60 + 34 * len(d)),
+                            width="stretch")
+        elif visao == "Estabelecimento":
+            d = filt.groupby("estab")["valor"].sum().sort_values(ascending=False).head(15).reset_index()
+            st.caption("Os 15 lugares onde você mais gastou no período.")
+            st.plotly_chart(barras(d, "valor", "estab", horizontal=True, altura=60 + 34 * len(d)),
+                            width="stretch")
+        elif visao == "Dia da semana":
+            nomes = ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"]
+            d = filt.groupby(filt["data"].dt.dayofweek)["valor"].sum().reindex(range(7), fill_value=0).reset_index()
+            d.columns = ["Dia", "Valor"]
+            d["Dia"] = d["Dia"].map(lambda i: nomes[i])
+            st.plotly_chart(barras(d, "Dia", "Valor"), width="stretch")
+        else:
+            st.caption("Cada bloco é um estabelecimento; o tamanho é o quanto você gastou. Clique numa categoria para ampliar.")
+            d = filt.groupby(["categoria", "estab"])["valor"].sum().reset_index()
+            d["_txt"] = d["valor"].map(brl)
+            fig = px.treemap(d, path=["categoria", "estab"], values="valor", color="categoria",
+                             color_discrete_map={c: CORES.get(c, CINZA) for c in d["categoria"].unique()})
+            fig.update_traces(texttemplate="%{label}<br>R$ %{value:,.0f}", textfont_color="white",
+                              hovertemplate="%{label}<br>R$ %{value:,.2f}<extra></extra>",
+                              marker=dict(line=dict(width=2, color="white")))
+            fig.update_layout(margin=dict(t=10, b=10, l=10, r=10), height=520)
+            st.plotly_chart(fig, width="stretch")
+
+        with st.expander(f"Ver as {len(filt)} compras filtradas"):
+            lista = filt.sort_values("data", ascending=False)[["data", "descricao", "categoria", "parcela", "valor"]]
+            st.dataframe(lista, hide_index=True, width="stretch", column_config={
+                "data": st.column_config.DateColumn("Data", format="DD/MM/YYYY"),
+                "descricao": "Descrição", "categoria": "Categoria", "parcela": "Parcela",
+                "valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")})
+            st.download_button("Baixar CSV do filtro", lista.to_csv(index=False).encode(),
+                               "compras_filtradas.csv", "text/csv")
+
+# ---------------------------------------------------------------- meu cartão
+with aba_cartao:
+    hoje = date.today()
+    dia_fech = int(fechamento)
+    venc = db.get_config("vencimento")
+    dia_venc = pd.Timestamp(venc).day if venc else None
+
+    m1, m2, m3 = st.columns(3)
+    m1.metric("Limite total", brl(limite))
+    m2.metric("Usado", brl(usado), f"{usado / limite:.0%} do limite" if limite else None,
+              delta_color="off", delta_arrow="off")
+    m3.metric("Disponível", brl(max(limite - usado, 0)))
+
+    m4, m5, m6 = st.columns(3)
+    if dia_fech:
+        prox = hoje.replace(day=dia_fech)
+        if hoje.day >= dia_fech:
+            prox = (pd.Timestamp(prox) + pd.DateOffset(months=1)).date()
+        m4.metric("Fatura fecha", f"dia {dia_fech}", f"faltam {(prox - hoje).days} dias",
+                  delta_color="off", delta_arrow="off")
+        m6.metric("Melhor dia para comprar", f"dia {dia_fech}",
+                  help="Comprando no dia do fechamento (ou logo depois), a compra só entra na "
+                       "fatura seguinte — você ganha cerca de 40 dias para pagar.")
+    else:
+        m4.metric("Fatura fecha", "—", help="Informe o dia de fechamento na barra lateral.")
+        m6.metric("Melhor dia para comprar", "—")
+    m5.metric("Vencimento", f"dia {dia_venc}" if dia_venc else "—",
+              help=None if dia_venc else "Vem da sincronização com o Nubank.")
+
+    st.subheader(f"Do que é feita a fatura {pd.Period(mes).strftime('%m/%Y')}")
+    chaves_rec = set(rec["Estabelecimento"].map(analise.chave_estabelecimento)) if not rec.empty else set()
+    eh_parc = gastos_mes["parcela"].notna() & (gastos_mes["parcela"] != "")
+    eh_rec = gastos_mes["descricao"].map(analise.chave_estabelecimento).isin(chaves_rec) & ~eh_parc
+    comp = pd.DataFrame({
+        "Tipo": ["Compras do mês", "Parcelas", "Assinaturas e recorrentes"],
+        "Valor": [gastos_mes[~eh_parc & ~eh_rec]["valor"].sum(), gastos_mes[eh_parc]["valor"].sum(),
+                  gastos_mes[eh_rec]["valor"].sum()]})
+    st.plotly_chart(barras(comp, "Valor", "Tipo", horizontal=True, altura=190), width="stretch")
+    fixo = comp["Valor"].iloc[1:].sum()
+    if gastos_mes["valor"].sum() > 0:
+        st.caption(f"{fixo / gastos_mes['valor'].sum():.0%} desta fatura ({brl(fixo)}) já estava "
+                   "comprometido com parcelas e assinaturas antes de você comprar qualquer coisa.")
+
+    st.subheader("Parcelas que ainda vão cair")
+    abertas = analise.parcelas_em_aberto(df)
+    if abertas.empty:
+        st.info("Nenhuma compra parcelada em aberto.")
+    else:
+        proj = analise.projecao_parcelas(abertas)
+        p1, p2 = st.columns(2)
+        p1.metric("Total ainda a pagar em parcelas", brl(abertas["Ainda a pagar"].sum()))
+        p2.metric("Última parcela termina em", proj["Fatura"].iloc[-1])
+        fig = barras(proj, "Fatura", "valor", altura=300)
+        fig.update_xaxes(type="category")
+        st.plotly_chart(fig, width="stretch")
+        st.dataframe(abertas.drop(columns="_mes").style.format({"Parcela": brl, "Ainda a pagar": brl}),
+                     hide_index=True, width="stretch")
+
+    with st.expander("Como funciona a fatura do cartão"):
+        st.markdown(
+            "- **Fechamento**: dia em que o banco soma as compras e fecha a fatura. Compras feitas "
+            "a partir desse dia entram na fatura do mês seguinte.\n"
+            "- **Vencimento**: dia limite para pagar, normalmente uns 7 dias depois do fechamento.\n"
+            "- **Limite**: uma compra parcelada ocupa o valor **inteiro** do limite na hora; ele é "
+            "liberado aos poucos, a cada parcela paga.\n"
+            "- **Pagar menos que o total** faz o restante entrar no rotativo, com os juros mais "
+            "altos do mercado. Sempre que der, pague a fatura inteira.")
 
 # ---------------------------------------------------------------- recorrentes
 with aba_rec:

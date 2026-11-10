@@ -56,10 +56,31 @@ streamlit run app.py
 Abra <http://localhost:8501>. Para ver o painel sem seus dados, use
 **Manutenção → Carregar dados de exemplo**.
 
-## Colocar na nuvem (acessar de qualquer lugar)
+## Acessar pelo celular, de qualquer lugar, com segurança
 
-Qualquer VPS barata serve (Oracle Cloud Free Tier, AWS Lightsail, DigitalOcean,
-Hostinger, Magalu Cloud...). Com Docker instalado no servidor:
+O painel só aceita conexões do próprio computador (`localhost`). Ele **não**
+fica exposto na rede nem na internet — e não deve ficar: não abra a porta 8501
+no roteador. Para acessar de fora, use o [Tailscale](https://tailscale.com),
+uma rede privada gratuita e criptografada entre os **seus** aparelhos:
+
+1. Instale o Tailscale no computador (<https://tailscale.com/download>) e entre com uma conta.
+2. Instale o app Tailscale no celular e entre com a **mesma conta**.
+3. Com o painel rodando, abra outro terminal no computador e rode:
+   ```bash
+   tailscale serve --bg 8501
+   ```
+   Na primeira vez ele pede para ativar o HTTPS (mostra um link; é só aceitar).
+   O comando devolve um endereço como `https://seu-pc.nome-da-rede.ts.net`.
+4. No celular, com o Tailscale ligado, abra esse endereço e entre com a senha do painel.
+
+Só aparelhos logados na sua conta Tailscale alcançam o endereço; para o resto
+da internet ele não existe. A conexão é HTTPS e ainda passa pela senha do
+painel, que bloqueia por 15 minutos após 5 tentativas erradas.
+
+O computador precisa estar ligado com o painel rodando. Para ficar disponível
+24 h, rode o mesmo projeto num servidor (abaixo) com o Tailscale instalado nele.
+
+### Em um servidor (VPS) com Docker
 
 ```bash
 git clone https://github.com/viniciusamp/controleatual.git
@@ -68,16 +89,10 @@ cp .env.example .env      # edite e defina APP_PASSWORD
 docker compose up -d --build
 ```
 
-Acesse `http://IP-DO-SERVIDOR:8501` (libere a porta 8501 no firewall do provedor).
-
-**Segurança — são seus dados financeiros:**
-- Sempre defina `APP_PASSWORD` no `.env`; sem ele o painel abre sem senha.
-- O ideal é usar HTTPS. O jeito mais simples: aponte um domínio para o IP e
-  coloque o [Caddy](https://caddyserver.com) na frente
-  (`caddy reverse-proxy --from seu.dominio.com --to localhost:8501`), que
-  gera o certificado automaticamente. Outra opção sem abrir porta nenhuma:
-  [Tailscale](https://tailscale.com) ou Cloudflare Tunnel.
-- O banco fica em `financas/dados/` no servidor — faça backup dessa pasta.
+O container também só escuta em `localhost`. Publique com `tailscale serve --bg 8501`
+(privado) ou, se quiser um endereço público, com um domínio e o
+[Caddy](https://caddyserver.com) (`caddy reverse-proxy --from seu.dominio.com --to localhost:8501`),
+que cuida do HTTPS. Faça backup da pasta `financas/dados/`.
 
 ## Como funciona
 
@@ -87,6 +102,10 @@ Acesse `http://IP-DO-SERVIDOR:8501` (libere a porta 8501 no firewall do provedor
   lateral; compras a partir desse dia vão para a fatura seguinte (0 = mês da compra).
 - **Uso do limite**: com a Pluggy usa o limite disponível real; com arquivo,
   estima pelo valor da fatura selecionada (parcelas futuras não entram).
+- **Explorar**: filtros por período, categoria, tipo (à vista/parcelada), valor e
+  texto, com visões por dia, mês, categoria, estabelecimento, dia da semana e mapa de blocos.
+- **Meu cartão**: limite, fechamento, vencimento, melhor dia de compra, composição
+  da fatura e projeção das parcelas que ainda vão cair nas próximas faturas.
 - **Recorrentes**: mesmo estabelecimento cobrado em meses diferentes com valor
   parecido (±15%), ou na categoria *Assinaturas*. Parcelamentos são ignorados.
 - **Onde economizar**: maior categoria, categorias acima da média, total de
