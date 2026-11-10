@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-from bi import analise, db, pluggy
+from bi import analise, db, login_ui, pluggy
 from bi.categorias import OUTROS, PAGAMENTO, REGRAS, categorizar
 from bi.importador import ler_arquivo
 
@@ -47,27 +47,32 @@ def exigir_senha() -> None:
     senha = os.environ.get("APP_PASSWORD")
     if not senha or st.session_state.get("ok"):
         return
-    st.title("🔒 Meu BI Financeiro")
-    bloqueio = db.get_config("login_bloqueado_ate")
-    if bloqueio and datetime.now() < datetime.fromisoformat(bloqueio):
-        st.error(f"Muitas tentativas erradas. Tente de novo às {datetime.fromisoformat(bloqueio):%H:%M}.")
-        st.stop()
-    with st.form("login"):
-        digitada = st.text_input("Senha", type="password")
-        entrar = st.form_submit_button("Entrar")
-    if entrar:
-        if hmac.compare_digest(digitada.encode(), senha.encode()):
-            db.set_config("login_falhas", 0)
-            st.session_state.ok = True
-            st.rerun()
-        time.sleep(1)
-        falhas = int(db.get_config("login_falhas", 0)) + 1
-        if falhas >= MAX_TENTATIVAS:
-            db.set_config("login_bloqueado_ate",
-                          (datetime.now() + timedelta(minutes=MINUTOS_BLOQUEIO)).isoformat())
-            falhas = 0
-        db.set_config("login_falhas", falhas)
-        st.error("Senha incorreta.")
+    st.markdown(login_ui.css(), unsafe_allow_html=True)
+    with st.container(key="login_card"):
+        st.markdown(login_ui.TOPO, unsafe_allow_html=True)
+        bloqueio = db.get_config("login_bloqueado_ate")
+        if bloqueio and datetime.now() < datetime.fromisoformat(bloqueio):
+            st.error(f"Muitas tentativas erradas. Tente de novo às {datetime.fromisoformat(bloqueio):%H:%M}.")
+            st.stop()
+        with st.form("login", border=False):
+            digitada = st.text_input("Senha", type="password", placeholder="Digite sua senha")
+            entrar = st.form_submit_button("Entrar", width="stretch")
+        if entrar:
+            if hmac.compare_digest(digitada.encode(), senha.encode()):
+                db.set_config("login_falhas", 0)
+                st.session_state.ok = True
+                st.rerun()
+            time.sleep(1)
+            falhas = int(db.get_config("login_falhas", 0)) + 1
+            if falhas >= MAX_TENTATIVAS:
+                db.set_config("login_bloqueado_ate",
+                              (datetime.now() + timedelta(minutes=MINUTOS_BLOQUEIO)).isoformat())
+                falhas = 0
+            db.set_config("login_falhas", falhas)
+            restam = MAX_TENTATIVAS - falhas if falhas else 0
+            st.error("Senha incorreta." + (f" Restam {restam} tentativas." if restam else
+                                           f" Acesso bloqueado por {MINUTOS_BLOQUEIO} minutos."))
+        st.markdown(login_ui.RODAPE, unsafe_allow_html=True)
     st.stop()
 
 
