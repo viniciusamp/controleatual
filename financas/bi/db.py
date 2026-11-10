@@ -24,6 +24,9 @@ def _conn() -> sqlite3.Connection:
             categoria_manual INTEGER DEFAULT 0,
             origem TEXT
         )""")
+    colunas = {r[1] for r in con.execute("PRAGMA table_info(transacoes)")}
+    if "categoria_banco" not in colunas:
+        con.execute("ALTER TABLE transacoes ADD COLUMN categoria_banco TEXT")
     con.execute("CREATE TABLE IF NOT EXISTS config (chave TEXT PRIMARY KEY, valor TEXT)")
     return con
 
@@ -39,10 +42,12 @@ def salvar(df: pd.DataFrame) -> int:
         antes = con.execute("SELECT COUNT(*) FROM transacoes").fetchone()[0]
         for _, l in df.iterrows():
             con.execute(
-                "INSERT OR IGNORE INTO transacoes (id, data, descricao, valor, parcela, categoria, origem) "
-                "VALUES (?,?,?,?,?,?,?)",
+                "INSERT OR IGNORE INTO transacoes "
+                "(id, data, descricao, valor, parcela, categoria, origem, categoria_banco) "
+                "VALUES (?,?,?,?,?,?,?,?)",
                 (l.get("id") or _id(l), str(pd.Timestamp(l["data"]).date()), l["descricao"],
-                 float(l["valor"]), l.get("parcela"), l.get("categoria"), l.get("origem")),
+                 float(l["valor"]), l.get("parcela"), l.get("categoria"), l.get("origem"),
+                 l.get("categoria_banco")),
             )
         return con.execute("SELECT COUNT(*) FROM transacoes").fetchone()[0] - antes
 
@@ -61,8 +66,10 @@ def definir_categoria(id_: str, categoria: str) -> None:
 def recategorizar(func) -> None:
     """Reaplica as regras nas transações que não foram editadas à mão."""
     with _conn() as con:
-        for id_, desc in con.execute("SELECT id, descricao FROM transacoes WHERE categoria_manual=0").fetchall():
-            con.execute("UPDATE transacoes SET categoria=? WHERE id=?", (func(desc), id_))
+        linhas = con.execute(
+            "SELECT id, descricao, categoria_banco FROM transacoes WHERE categoria_manual=0").fetchall()
+        for id_, desc, cat_banco in linhas:
+            con.execute("UPDATE transacoes SET categoria=? WHERE id=?", (func(desc, cat_banco), id_))
 
 
 def apagar_tudo() -> None:

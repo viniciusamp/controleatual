@@ -29,12 +29,21 @@ Formatos aceitos:
 
 Importar o mesmo arquivo duas vezes não duplica nada.
 
-### Conectar pela Pluggy (opcional)
-1. Crie uma conta em <https://dashboard.pluggy.ai> e gere **Client ID** e **Client Secret**.
-2. No dashboard, conecte sua conta Nubank (Open Finance). Copie o **Item ID** gerado.
-3. Preencha `PLUGGY_CLIENT_ID`, `PLUGGY_CLIENT_SECRET` e `PLUGGY_ITEM_ID` no `.env`.
-4. Aparece o botão **🔄 Sincronizar com Nubank** na barra lateral. Ele traz os
-   últimos 12 meses de transações, o limite total e o limite disponível reais.
+### Conectar pela Pluggy — grátis com o Meu Pluggy
+1. Crie conta em <https://meu.pluggy.ai> e conecte o Nubank (Open Finance).
+2. Crie conta de desenvolvedor em <https://dashboard.pluggy.ai>. Em **Aplicações**
+   aparece uma aplicação de desenvolvimento com **Client ID** e **Client Secret** (🔑).
+3. Clique no **▶** dessa aplicação, busque o conector **MeuPluggy** (não "Nubank" —
+   contas de teste só conectam o MeuPluggy ou bancos sandbox) e entre com o login do meu.pluggy.ai.
+4. Copie o **Item ID** da conexão: em **Visualizar JSON**, é o campo `itemId` das contas.
+5. Crie `financas/.env` (copie de `.env.example`) com `PLUGGY_CLIENT_ID`,
+   `PLUGGY_CLIENT_SECRET` e `PLUGGY_ITEM_ID` — **todos da mesma aplicação**.
+
+O painel então sincroniza sozinho ao abrir (no máximo a cada 6 h) e pelo botão
+**🔄 Sincronizar com Nubank**. Ele traz 12 meses de transações do cartão, o limite
+total/disponível e o dia de fechamento reais. As categorias da Pluggy (em inglês)
+são traduzidas para as do BI quando as regras por palavra-chave não reconhecem
+a compra. O MeuPluggy atualiza os dados do banco uma vez por dia.
 
 ## Rodar no seu computador
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hmac
 import os
+from datetime import datetime, timedelta
 
 import pandas as pd
 import plotly.express as px
@@ -13,6 +14,22 @@ from bi import analise, db, pluggy
 from bi.categorias import OUTROS, PAGAMENTO, REGRAS, categorizar
 from bi.importador import ler_arquivo
 
+
+
+def carregar_env() -> None:
+    """Lê financas/.env (para rodar sem Docker). Variáveis já definidas têm prioridade."""
+    caminho = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.exists(caminho):
+        return
+    with open(caminho, encoding="utf-8") as f:
+        for linha in f:
+            linha = linha.strip()
+            if linha and not linha.startswith("#") and "=" in linha:
+                chave, valor = linha.split("=", 1)
+                os.environ.setdefault(chave.strip(), valor.strip().strip('"').strip("'"))
+
+
+carregar_env()
 st.set_page_config(page_title="Meu BI Financeiro", page_icon="💳", layout="wide")
 
 # Paleta categórica validada (ordem fixa; cor segue a categoria, nunca o ranking)
@@ -42,6 +59,35 @@ exigir_senha()
 def brl(v: float) -> str:
     return f"R$ {v:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
+
+# ---------------------------------------------------------------- Pluggy
+HORAS_AUTO_SYNC = 6
+
+
+def sincronizar_pluggy() -> int:
+    df_p, info = pluggy.sincronizar()
+    df_p["categoria"] = [categorizar(d, c) for d, c in zip(df_p["descricao"], df_p["categoria_banco"])]
+    n = db.salvar(df_p)
+    if info.get("limite"):
+        db.set_config("limite", info["limite"])
+        db.set_config("disponivel", info["disponivel"])
+    if info.get("fechamento"):
+        db.set_config("fechamento", pd.Timestamp(info["fechamento"]).day)
+    if info.get("vencimento"):
+        db.set_config("vencimento", str(pd.Timestamp(info["vencimento"]).date()))
+    db.set_config("ultima_sync", datetime.now().isoformat(timespec="minutes"))
+    return n
+
+
+if pluggy.configurado() and "auto_sync" not in st.session_state:
+    st.session_state.auto_sync = True
+    ultima = db.get_config("ultima_sync")
+    if not ultima or datetime.now() - datetime.fromisoformat(ultima) > timedelta(hours=HORAS_AUTO_SYNC):
+        with st.spinner("Atualizando dados do Nubank..."):
+            try:
+                sincronizar_pluggy()
+            except Exception as e:  # noqa: BLE001
+                st.warning(f"Não consegui atualizar automaticamente: {e}")
 
 # ---------------------------------------------------------------- sidebar
 with st.sidebar:
@@ -75,18 +121,13 @@ with st.sidebar:
         if st.button("🔄 Sincronizar com Nubank (Open Finance)"):
             with st.spinner("Buscando dados na Pluggy..."):
                 try:
-                    df_p, info = pluggy.sincronizar()
-                    df_p["categoria"] = [categorizar(d, c) for d, c in
-                                         zip(df_p["descricao"], df_p["categoria_banco"])]
-                    n = db.salvar(df_p)
-                    if info.get("limite"):
-                        db.set_config("limite", info["limite"])
-                    if info.get("disponivel") is not None:
-                        db.set_config("disponivel", info["disponivel"])
-                    st.success(f"{n} transações novas.")
+                    st.toast(f"{sincronizar_pluggy()} transações novas.")
                     st.rerun()
                 except Exception as e:  # noqa: BLE001
                     st.error(f"Falha na sincronização: {e}")
+        ultima = db.get_config("ultima_sync")
+        if ultima:
+            st.caption(f"Última sincronização: {datetime.fromisoformat(ultima):%d/%m %H:%M}")
     else:
         st.caption("Conexão automática: configure as variáveis PLUGGY_* (veja o README).")
 
